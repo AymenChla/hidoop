@@ -1,13 +1,17 @@
 /* une PROPOSITION de squelette, incomplète et adaptable... */
 
 package hdfs;
+import java.util.List;
+
 import formats.Format;
+import formats.Format.OpenMode;
 import formats.KV;
 import formats.KVFormat;
 import formats.LineFormat;
 
 public class HdfsClient {
-
+	//final public List<String> s;
+	
     private static void usage() {
         System.out.println("Usage: java HdfsClient read <file>");
         System.out.println("Usage: java HdfsClient write <line|kv> <file>");
@@ -23,8 +27,9 @@ public class HdfsClient {
 
 	
     public static void main(String[] args) {
-        // java HdfsClient <read|write> <line|kv> <file>
-
+        
+    	tests();
+    	
         try {
             if (args.length<2) {usage(); return;}
 
@@ -42,6 +47,30 @@ public class HdfsClient {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+    
+    public static void tests()
+    {
+    	// java HdfsClient <read|write> <line|kv> <file>
+    	/*KVFormat kvf = new KVFormat();
+    	kvf.setFname("data/testKVRead.txt");
+    	kvf.open(OpenMode.R);
+    	System.out.println(kvf.read());
+    	*/
+    	
+    	/*KVFormat kvf = new KVFormat();
+    	kvf.setFname("data/testkvWrite.txt");
+    	kvf.open(OpenMode.W);
+    	KV record = new KV("k","v");
+    	kvf.write(record);
+    	kvf.write(record);
+    	kvf.close();*/
+    	
+    	LineFormat linef = new LineFormat();
+    	linef.setFname("data/filesample.txt");
+    	linef.open(OpenMode.R);
+    	System.out.println(linef.read());
+    	System.out.println(linef.read());
     }
 
 }
