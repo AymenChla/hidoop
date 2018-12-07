@@ -1,6 +1,12 @@
 /* une PROPOSITION de squelette, incomplète et adaptable... */
 
 package hdfs;
+import hdfs.Commande.NumCommande;
+
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import formats.Format;
@@ -21,14 +27,36 @@ public class HdfsClient {
     public static void HdfsDelete(String hdfsFname) {}
 	
     public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
-     int repFactor) { }
+     int repFactor) {
+    	try {
+    		System.out.println("connection");
+			Socket client = new Socket(HdfsServer.serverAdresse,HdfsServer.serverPort);
+			Commande cmd = new Commande(NumCommande.CMD_WRITE,localFSSourceFname,fmt);
+			
+			System.out.println("send");
+			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+			oos.writeObject(cmd);
+			
+			oos.close();
+			client.close();
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
+    }
 
     public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
 
 	
     public static void main(String[] args) {
         
-    	tests();
+    	//tests();
     	
         try {
             if (args.length<2) {usage(); return;}
