@@ -1,79 +1,79 @@
-/* une PROPOSITION de squelette, incomplète et adaptable... */
-
-package hdfs;
-import hdfs.Commande.NumCommande;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.MalformedURLException;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.List;
-
-import formats.Format;
-import formats.Format.OpenMode;
-import formats.FormatFactory;
-import formats.KV;
-import formats.KVFormat;
-import formats.LineFormat;
-
-public class HdfsClient {
+	/* une PROPOSITION de squelette, incomplète et adaptable... */
 	
-	static public String nameNodeAdresse = "localhost";
-	static public int nameNodePort = 4000;
-	static public String nameNodeName = "NameNodeDaemon";
+	package hdfs;
+	import hdfs.Commande.NumCommande;
 	
-	public static int chunk_size;
+	import java.io.BufferedReader;
+	import java.io.File;
+	import java.io.FileReader;
+	import java.io.IOException;
+	import java.io.ObjectOutputStream;
+	import java.net.MalformedURLException;
+	import java.net.Socket;
+	import java.net.UnknownHostException;
+	import java.rmi.Naming;
+	import java.rmi.NotBoundException;
+	import java.rmi.RemoteException;
+	import java.util.ArrayList;
+	import java.util.List;
 	
-    private static void usage() {
-        System.out.println("Usage: java HdfsClient read <file>");
-        System.out.println("Usage: java HdfsClient write <line|kv> <file>");
-        System.out.println("Usage: java HdfsClient delete <file>");
-    }
+	import formats.Format;
+	import formats.Format.OpenMode;
+	import formats.FormatFactory;
+	import formats.KV;
+	import formats.KVFormat;
+	import formats.LineFormat;
 	
-    public static void HdfsDelete(String hdfsFname) {}
-    
-    public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
-     int repFactor) {
-    	try {
-    		
-    		//get datanodes
-    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
-            List<DataNodeInfo> dataNodes = nameNode.getDataNodesInfo();
-    		
-
-            File file = new File(localFSSourceFname);
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            
-            //calculate files number of lines
-            br.mark(8192);
-            int nbline = 0;
-            while (br.readLine() != null) nbline++;
-            br.reset();	
-            
-            int chunk_nb_line = nbline/dataNodes.size();
-            int rest = nbline%dataNodes.size();
-            
-            
-            
-    		System.out.println(file.exists()+" "+localFSSourceFname+" "+file.length());
-    		System.out.println(dataNodes.size()+" "+chunk_nb_line + " " +rest+" " + nbline);
-    		
-    		
-    		Format format = FormatFactory.getFormat(fmt);
-    		format.setFname(localFSSourceFname);
-    		format.open(OpenMode.R);
-    		
-    		
-    		//createMetadatafile
-    		MetadataFile metadataFile = new MetadataFile(localFSSourceFname,file.length());
+	public class HdfsClient {
+		
+		static public String nameNodeAdresse = "localhost";
+		static public int nameNodePort = 4000;
+		static public String nameNodeName = "NameNodeDaemon";
+		
+		public static int chunk_size;
+		
+	    private static void usage() {
+	        System.out.println("Usage: java HdfsClient read <file>");
+	        System.out.println("Usage: java HdfsClient write <line|kv> <file>");
+	        System.out.println("Usage: java HdfsClient delete <file>");
+	    }
+		
+	    public static void HdfsDelete(String hdfsFname) {}
+	    
+	    public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
+	     int repFactor) {
+	    	try {
+	    		
+	    		//get datanodes
+	    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+	            List<DataNodeInfo> dataNodes = nameNode.getDataNodesInfo();
+	    		
+	
+	            File file = new File(localFSSourceFname);
+	            BufferedReader br = new BufferedReader(new FileReader(file));
+	            
+	            //calculate files number of lines
+	            br.mark(8192);
+	            int nbline = 0;
+	            while (br.readLine() != null) nbline++;
+	            br.reset();	
+	            
+	            int chunk_nb_line = nbline/dataNodes.size();
+	            int rest = nbline%dataNodes.size();
+	            
+	            
+	            
+	    		System.out.println(file.exists()+" "+localFSSourceFname+" "+file.length());
+	    		System.out.println(dataNodes.size()+" "+chunk_nb_line + " " +rest+" " + nbline);
+	    		
+	    		
+	    		Format format = FormatFactory.getFormat(fmt);
+	    		format.setFname(localFSSourceFname);
+	    		format.open(OpenMode.R);
+	    		
+	    		
+	    		//createMetadatafile
+    		MetadataFile metadataFile = new MetadataFile(localFSSourceFname,file.length(),fmt);
     		List<MetadataChunk> metadataChunks = new ArrayList<MetadataChunk>();
     		
             for(int i=0 ; i < dataNodes.size() ; i++)
@@ -129,12 +129,27 @@ public class HdfsClient {
     	
     }
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) { }
+    public static void HdfsRead(String hdfsFname, String localFSDestFname) {
+    	//TODO gerer hdfsFname et localDSDestFname
+    	
+    	//get MetadataFile
+		try {
+			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+			MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
+			
+			
+			
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+    }
 
 	
     public static void main(String[] args) {
         
-    	//tests(args[0]);
+    	tests(args[0]);
     	
         try {
             if (args.length<2) {usage(); return;}

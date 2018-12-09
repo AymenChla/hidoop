@@ -59,8 +59,8 @@ public class MetadataChunk implements Serializable{
 
 	@Override
 	public String toString() {
-		return "MetadataChunk [handle=" + handle + ", chunk_size=" + chunk_size
-				+ ", repFactor=" + repFactor + ", datanode=" + datanode + "]";
+		return handle + ":" + chunk_size
+				+ ":" + repFactor + ":" + datanode;
 	}
 	
 	

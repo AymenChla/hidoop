@@ -35,7 +35,7 @@ public class DataNodeInfo implements Serializable{
 
 	@Override
 	public String toString() {
-		return "DataNodeInfo [ip=" + ip + ", port=" + port + "]";
+		return ip + ":" + port;
 	}
 	
 	

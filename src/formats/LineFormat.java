@@ -28,9 +28,9 @@ public class LineFormat implements Format{
 
 			try {
 				String nextLine = br.readLine();
-				index += nextLine.getBytes().length+1;
 				if(nextLine != null)
 				{
+					index += nextLine.getBytes().length+1;
 					String key = Long.toString(nextNbLine);
 					nextNbLine++;
 					KV record = new KV(key,nextLine);

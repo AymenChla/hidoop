@@ -27,9 +27,9 @@ public class KVFormat implements Format{
 
 			try {
 				String nextLine = br.readLine();
-				index += nextLine.getBytes().length+1;
 				if(nextLine != null)
 				{
+					index += nextLine.getBytes().length+1;
 					int index_sep = nextLine.indexOf(KV.SEPARATOR);
 					if( index_sep >= 0)
 					{

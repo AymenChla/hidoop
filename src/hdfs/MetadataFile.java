@@ -3,6 +3,8 @@ package hdfs;
 import java.io.Serializable;
 import java.util.List;
 
+import formats.Format;
+
 public class MetadataFile implements Serializable{
 	
 	/**
@@ -11,12 +13,19 @@ public class MetadataFile implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String fileName;
 	private long fileSize;
+	private Format.Type fmt;
 	private List<MetadataChunk> chunks;
 	
-	public MetadataFile(String fileName, long fileSize) {
+	
+	public MetadataFile() {
+		super();
+	}
+
+	public MetadataFile(String fileName, long fileSize, Format.Type fmt) {
 		super();
 		this.fileName = fileName;
 		this.fileSize = fileSize;
+		this.fmt = fmt;
 	}
 
 	public String getFileName() {
@@ -43,9 +52,17 @@ public class MetadataFile implements Serializable{
 		this.chunks = chunks;
 	}
 
+	public Format.Type getFmt() {
+		return fmt;
+	}
+
+	public void setFmt(Format.Type fmt) {
+		this.fmt = fmt;
+	}
+
 	@Override
 	public String toString() {
-		return "MetadataFile [fileName=" + fileName + ", fileSize=" + fileSize +"]";
+		return fileName + ":" + fileSize + ":" + fmt;
 	}
 	
 	
