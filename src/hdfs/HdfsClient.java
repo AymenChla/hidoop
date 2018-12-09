@@ -3,20 +3,34 @@
 package hdfs;
 import hdfs.Commande.NumCommande;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 
 import formats.Format;
 import formats.Format.OpenMode;
+import formats.FormatFactory;
 import formats.KV;
 import formats.KVFormat;
 import formats.LineFormat;
 
 public class HdfsClient {
-	//final public List<String> s;
+	
+	static public String nameNodeAdresse = "localhost";
+	static public int nameNodePort = 4000;
+	static public String nameNodeName = "NameNodeDaemon";
+	
+	public static int chunk_size;
 	
     private static void usage() {
         System.out.println("Usage: java HdfsClient read <file>");
@@ -25,25 +39,89 @@ public class HdfsClient {
     }
 	
     public static void HdfsDelete(String hdfsFname) {}
-	
+    
     public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
      int repFactor) {
     	try {
-    		System.out.println("connection");
-			Socket client = new Socket(HdfsServer.serverAdresse,HdfsServer.serverPort);
-			Commande cmd = new Commande(NumCommande.CMD_WRITE,localFSSourceFname,fmt);
-			
-			System.out.println("send");
-			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
-			oos.writeObject(cmd);
-			
-			oos.close();
-			client.close();
+    		
+    		//get datanodes
+    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+            List<DataNodeInfo> dataNodes = nameNode.getDataNodesInfo();
+    		
+
+            File file = new File(localFSSourceFname);
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            
+            //calculate files number of lines
+            br.mark(8192);
+            int nbline = 0;
+            while (br.readLine() != null) nbline++;
+            br.reset();	
+            
+            int chunk_nb_line = nbline/dataNodes.size();
+            int rest = nbline%dataNodes.size();
+            
+            
+            
+    		System.out.println(file.exists()+" "+localFSSourceFname+" "+file.length());
+    		System.out.println(dataNodes.size()+" "+chunk_nb_line + " " +rest+" " + nbline);
+    		
+    		
+    		Format format = FormatFactory.getFormat(fmt);
+    		format.setFname(localFSSourceFname);
+    		format.open(OpenMode.R);
+    		
+    		
+    		//createMetadatafile
+    		MetadataFile metadataFile = new MetadataFile(localFSSourceFname,file.length());
+    		List<MetadataChunk> metadataChunks = new ArrayList<MetadataChunk>();
+    		
+            for(int i=0 ; i < dataNodes.size() ; i++)
+            {
+            	System.out.println("connection");
+            	Commande cmd = new Commande(NumCommande.CMD_WRITE,localFSSourceFname+i,fmt);
+            	Socket client = new Socket(dataNodes.get(i).getIp(),dataNodes.get(i).getPort());
+            	
+            	System.out.println("send cmd");
+    			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+    			oos.writeObject(cmd);
+    			
+    			for(int j=0 ; j < chunk_nb_line ; j++)
+    			{
+    				KV record = format.read();
+    				oos.writeObject(record);
+    			}
+    			
+    			int k=0;
+    			if(rest != 0)
+    			{
+    				k++;
+    				KV record = format.read();
+    				oos.writeObject(record);
+    				rest--;
+    			}
+    			//pour terminaison
+				oos.writeObject(null);
+				
+				MetadataChunk metadataChunk = new MetadataChunk(localFSSourceFname+i, chunk_nb_line+k, repFactor,dataNodes.get(i));
+				metadataChunks.add(metadataChunk);
+				
+    			oos.close();
+    			client.close();
+            }
+            format.close();
+    		
+            //save metadata into namenode
+			metadataFile.setChunks(metadataChunks);
+			nameNode.addMetaDataFile(metadataFile);
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -56,7 +134,7 @@ public class HdfsClient {
 	
     public static void main(String[] args) {
         
-    	//tests();
+    	//tests(args[0]);
     	
         try {
             if (args.length<2) {usage(); return;}
@@ -77,7 +155,7 @@ public class HdfsClient {
         }
     }
     
-    public static void tests()
+    public static void tests(String fileName)
     {
     	// java HdfsClient <read|write> <line|kv> <file>
     	/*KVFormat kvf = new KVFormat();
@@ -94,11 +172,29 @@ public class HdfsClient {
     	kvf.write(record);
     	kvf.close();*/
     	
-    	LineFormat linef = new LineFormat();
+    	/*LineFormat linef = new LineFormat();
     	linef.setFname("data/filesample.txt");
     	linef.open(OpenMode.R);
     	System.out.println(linef.read());
-    	System.out.println(linef.read());
+    	System.out.println(linef.read());*/
+    	
+    	try {
+			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+			MetadataFile file = nameNode.getMetaDataFile(fileName);
+			System.out.println(file);
+			for(MetadataChunk chunk : file.getChunks())
+			{
+				System.out.println(chunk);
+				
+			}
+			
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	
     }
+    
 
 }

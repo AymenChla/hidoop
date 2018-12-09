@@ -13,7 +13,7 @@ public class LineFormat implements Format{
 	private String fname;
 	private long index;
 	private OpenMode mode;
-	private long nextNbLine; 
+	private long nextNbLine;
 	
 	private BufferedReader br;
 	private PrintWriter pw ;

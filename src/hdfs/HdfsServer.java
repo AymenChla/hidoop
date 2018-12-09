@@ -5,13 +5,52 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+
+import formats.Format;
+import formats.FormatFactory;
+import formats.KV;
+import formats.KVFormat;
+import formats.Format.OpenMode;
 
 public class HdfsServer extends Thread{
 	
-	static public String serverAdresse = "localhost";
-	static public int serverPort = 1995;
+	static public String ip;
+	static public int port;
+	static public String nameNodeAdresse = "localhost";
+	static public int nameNodePort = 4000;
+	static public String nameNodeName = "NameNodeDaemon";
+	
 	
 	static private Socket client;
+	
+	private static void usage() {
+        System.out.println("Usage: java HdfsServer ip port");
+    }
+	
+	public void write(Commande cmd,ObjectInputStream ois)
+	{
+		System.out.println("write-server");
+		Format format = FormatFactory.getFormat(cmd.getFmt());
+		format.setFname(cmd.getChunkName());
+		format.open(OpenMode.W);
+		
+		KV record = null;
+		try {
+			while( (record = (KV) ois.readObject()) != null)
+			{
+				System.out.println(record);
+				format.write(record);
+			}
+			
+		} catch (ClassNotFoundException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		format.close();
+	}
 	
 	public void run()
 	{
@@ -19,10 +58,17 @@ public class HdfsServer extends Thread{
 			System.out.println("accepted");
 			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
 			
-			System.out.println("readed");
+			System.out.println("read");
 			Commande cmd = (Commande) ois.readObject();
 			System.out.println(cmd);
 			
+			switch(cmd.getCmd()){
+				case CMD_WRITE:
+					write(cmd,ois);
+				break;
+			}
+			
+			System.out.println("close ois");
 			ois.close();
 			client.close();
 			
@@ -32,10 +78,26 @@ public class HdfsServer extends Thread{
 	}
 	
 	public static void main(String args[])
-	{
+	{	
+		if(args.length < 2)
+		{
+			usage();
+			return;
+		}
+		
+		ip = args[0];
+		port = Integer.parseInt(args[1]);
+		
+		
+		
 		try {
 			
-			ServerSocket server = new ServerSocket(serverPort);
+			//register datanode
+			DataNodeInfo dataNodeInfo= new DataNodeInfo(ip,port);
+			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+			nameNode.addDataNodeInfo(dataNodeInfo);
+			
+			ServerSocket server = new ServerSocket(port);
 			while(true)
 			{
 				System.out.println("attente");
@@ -45,7 +107,7 @@ public class HdfsServer extends Thread{
 				hdfsServeur.start();
 			}
 			
-		} catch (IOException e) {
+		} catch (IOException | NotBoundException e) {
 			e.printStackTrace();
 		} 
 	}

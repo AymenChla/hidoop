@@ -25,5 +25,36 @@ public class Commande implements Serializable{
 	{
 		return cmd + " " + chunkName + " " + fmt;
 	}
+
+
+	public NumCommande getCmd() {
+		return cmd;
+	}
+
+
+	public void setCmd(NumCommande cmd) {
+		this.cmd = cmd;
+	}
+
+
+	public String getChunkName() {
+		return chunkName;
+	}
+
+
+	public void setChunkName(String chunkName) {
+		this.chunkName = chunkName;
+	}
+
+
+	public Format.Type getFmt() {
+		return fmt;
+	}
+
+
+	public void setFmt(Format.Type fmt) {
+		this.fmt = fmt;
+	}
+	
 	
 }
