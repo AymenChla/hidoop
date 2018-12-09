@@ -52,11 +52,37 @@ public class HdfsServer extends Thread{
 		format.close();
 	}
 	
+
+	private void read(Commande cmd, ObjectOutputStream oos) {
+		
+		System.out.println("read-server");
+		Format format = FormatFactory.getFormat(cmd.getFmt());
+		format.setFname(cmd.getChunkName());
+		format.open(OpenMode.R);
+		
+		KV record = null;
+		try {
+			while( (record = format.read()) != null)
+			{
+				System.out.println(record);
+				oos.writeObject(record);
+			}
+			oos.writeObject(null);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		format.close();
+	}
+
+	
 	public void run()
 	{
 		try {
 			System.out.println("accepted");
 			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
+			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
 			
 			System.out.println("read");
 			Commande cmd = (Commande) ois.readObject();
@@ -66,10 +92,15 @@ public class HdfsServer extends Thread{
 				case CMD_WRITE:
 					write(cmd,ois);
 				break;
+				
+				case CMD_READ:
+					read(cmd,oos);
+				break;
 			}
 			
-			System.out.println("close ois");
+			
 			ois.close();
+			oos.close();
 			client.close();
 			
 		} catch (IOException | ClassNotFoundException e) {

@@ -2,27 +2,28 @@
 	
 	package hdfs;
 	import hdfs.Commande.NumCommande;
-	
+
 	import java.io.BufferedReader;
-	import java.io.File;
-	import java.io.FileReader;
-	import java.io.IOException;
-	import java.io.ObjectOutputStream;
-	import java.net.MalformedURLException;
-	import java.net.Socket;
-	import java.net.UnknownHostException;
-	import java.rmi.Naming;
-	import java.rmi.NotBoundException;
-	import java.rmi.RemoteException;
-	import java.util.ArrayList;
-	import java.util.List;
-	
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.MalformedURLException;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+
 	import formats.Format;
-	import formats.Format.OpenMode;
-	import formats.FormatFactory;
-	import formats.KV;
-	import formats.KVFormat;
-	import formats.LineFormat;
+import formats.Format.OpenMode;
+import formats.FormatFactory;
+import formats.KV;
+import formats.KVFormat;
+import formats.LineFormat;
 	
 	public class HdfsClient {
 		
@@ -33,7 +34,7 @@
 		public static int chunk_size;
 		
 	    private static void usage() {
-	        System.out.println("Usage: java HdfsClient read <file>");
+	        System.out.println("Usage: java HdfsClient read <file> <destfile>");
 	        System.out.println("Usage: java HdfsClient write <line|kv> <file>");
 	        System.out.println("Usage: java HdfsClient delete <file>");
 	    }
@@ -137,9 +138,36 @@
 			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
 			MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 			
+			Format format = FormatFactory.getFormat(metadataFile.getFmt());
 			
+			format.setFname(localFSDestFname);
+			format.open(OpenMode.W);
 			
-		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			List<MetadataChunk> chunks = metadataFile.getChunks();
+			for(MetadataChunk chunk : chunks)
+			{
+				DataNodeInfo datanode = chunk.getDatanode();
+				Socket client = new Socket(datanode.getIp(),datanode.getPort());
+				Commande cmd = new Commande(NumCommande.CMD_READ,chunk.getHandle(),metadataFile.getFmt());
+				
+				ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+				ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
+    			oos.writeObject(cmd);
+    			
+    			KV record = null;
+    			while((record = (KV) ois.readObject()) != null)
+    			{
+    				format.write(record);
+    			}
+    			
+    			oos.close();
+    			ois.close();
+    			 
+			}
+			
+			format.close();
+			
+		} catch (NotBoundException | IOException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -149,13 +177,15 @@
 	
     public static void main(String[] args) {
         
-    	tests(args[0]);
+    	//tests(args[0]);
     	
         try {
             if (args.length<2) {usage(); return;}
 
             switch (args[0]) {
-              case "read": HdfsRead(args[1],null); break;
+              case "read":
+            	  if (args.length<3) {usage(); return;}
+            	  HdfsRead(args[1],args[2]); break;
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;
