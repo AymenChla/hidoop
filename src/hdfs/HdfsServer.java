@@ -1,5 +1,6 @@
 package hdfs;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -75,14 +76,19 @@ public class HdfsServer extends Thread{
 		
 		format.close();
 	}
-
+	
+	private void delete(String chankHandle)
+	{
+		File file = new File(chankHandle);
+		file.delete();
+	}
 	
 	public void run()
 	{
 		try {
 			System.out.println("accepted");
 			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
-			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+			
 			
 			System.out.println("read");
 			Commande cmd = (Commande) ois.readObject();
@@ -94,13 +100,18 @@ public class HdfsServer extends Thread{
 				break;
 				
 				case CMD_READ:
+					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
 					read(cmd,oos);
+					oos.close();
+				break;
+				
+				case CMD_DELETE:
+					delete(cmd.getChunkName());
 				break;
 			}
 			
 			
 			ois.close();
-			oos.close();
 			client.close();
 			
 		} catch (IOException | ClassNotFoundException e) {

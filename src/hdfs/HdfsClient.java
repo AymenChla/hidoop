@@ -39,7 +39,7 @@ import formats.LineFormat;
 	        System.out.println("Usage: java HdfsClient delete <file>");
 	    }
 		
-	    public static void HdfsDelete(String hdfsFname) {}
+	   
 	    
 	    public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
 	     int repFactor) {
@@ -151,10 +151,10 @@ import formats.LineFormat;
 				Commande cmd = new Commande(NumCommande.CMD_READ,chunk.getHandle(),metadataFile.getFmt());
 				
 				ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
-				ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
     			oos.writeObject(cmd);
     			
     			KV record = null;
+    			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
     			while((record = (KV) ois.readObject()) != null)
     			{
     				format.write(record);
@@ -174,7 +174,34 @@ import formats.LineFormat;
         
     }
 
-	
+	public static void HdfsDelete(String hdfsFname) {
+	    	
+			try {
+				
+				//get MetadataFile
+				NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
+			
+				List<MetadataChunk> chunks = metadataFile.getChunks();
+				for(MetadataChunk chunk : chunks)
+				{
+					DataNodeInfo datanode = chunk.getDatanode();
+					Socket client = new Socket(datanode.getIp(),datanode.getPort());
+					Commande cmd = new Commande(NumCommande.CMD_DELETE,chunk.getHandle(),metadataFile.getFmt());
+					
+					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+	    			oos.writeObject(cmd);
+	    			oos.close();
+	    			 
+				}
+				nameNode.deleteMetaDataFile(metadataFile.getFileName()+"i");
+				
+			} catch (NotBoundException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	    }
+
     public static void main(String[] args) {
         
     	//tests(args[0]);

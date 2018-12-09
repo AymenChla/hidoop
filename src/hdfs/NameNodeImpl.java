@@ -1,5 +1,6 @@
 package hdfs;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -106,6 +107,11 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	}
 
 
-	
+	@Override
+	public void deleteMetaDataFile(String fileName) throws RemoteException {
+		File file = new File(fileName);
+		file.delete();
+	}
+
 	
 }
