@@ -18,11 +18,13 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	
 	static private int port = 4000;
 	private List<DataNodeInfo> dataNodesInfos;
+	private List<DataNodeInfo> daemons;
 	private String metaDataPath = "../data/";
 	
 	protected NameNodeImpl() throws RemoteException {
 		super();
 		dataNodesInfos = new ArrayList<DataNodeInfo>();
+		daemons = new ArrayList<DataNodeInfo>();
 	}
 
 	
@@ -30,6 +32,8 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	public List<DataNodeInfo> getDataNodesInfo() {
 		return dataNodesInfos;
 	}
+	
+	
 	
 	public static void main(String args[])
 	{
@@ -49,7 +53,8 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	public void addDataNodeInfo(DataNodeInfo info) {
 		dataNodesInfos.add(info);
 	}
-
+	
+	
 
 	@Override
 	public void addMetaDataFile(MetadataFile metadata) throws RemoteException {
@@ -113,5 +118,11 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 		file.delete();
 	}
 
+	public void addDaemon(DataNodeInfo info) {
+		daemons.add(info);
+	}
 	
+	public List<DataNodeInfo> getDaemons() {
+		return daemons;
+	}
 }

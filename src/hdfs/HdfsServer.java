@@ -1,13 +1,16 @@
 package hdfs;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.util.Properties;
 
 import formats.Format;
 import formats.FormatFactory;
@@ -19,16 +22,36 @@ public class HdfsServer extends Thread{
 	
 	static public String ip;
 	static public int port;
-	static public String nameNodeAdresse = "localhost";
-	static public int nameNodePort = 4000;
-	static public String nameNodeName = "NameNodeDaemon";
-	
+	static public String nameNodeIp ;
+	static public int nameNodePort;
+	static public String nameNodeName;
+	static public String config_path = "../config/namenode.properties";
 	
 	static private Socket client;
 	
 	private static void usage() {
         System.out.println("Usage: java HdfsServer ip port");
     }
+	
+	
+	public static void loadConfig(String path) {
+    	//load namenode config
+    	
+        Properties prop = new Properties();
+        InputStream input = null;
+        try {
+        	input = new FileInputStream(config_path);
+            prop.load(input);
+            
+            nameNodeIp = prop.getProperty("ip");
+            nameNodePort = Integer.parseInt(prop.getProperty("port"));
+            nameNodeName = prop.getProperty("name");
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    
+	}
 	
 	public void write(Commande cmd,ObjectInputStream ois)
 	{
@@ -134,9 +157,12 @@ public class HdfsServer extends Thread{
 		
 		try {
 			
+			
+			
 			//register datanode
+			loadConfig(config_path);
 			DataNodeInfo dataNodeInfo= new DataNodeInfo(ip,port);
-			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
 			nameNode.addDataNodeInfo(dataNodeInfo);
 			
 			ServerSocket server = new ServerSocket(port);

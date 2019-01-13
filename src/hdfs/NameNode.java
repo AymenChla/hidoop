@@ -10,4 +10,7 @@ public interface NameNode extends Remote{
 	public void addMetaDataFile(MetadataFile metadata) throws RemoteException;
 	public MetadataFile getMetaDataFile(String fileName) throws RemoteException;
 	public void deleteMetaDataFile(String fileName) throws RemoteException;
+	
+	public List<DataNodeInfo> getDaemons() throws RemoteException;
+	public void addDaemon(DataNodeInfo info) throws RemoteException;
 }

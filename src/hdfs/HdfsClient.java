@@ -5,8 +5,10 @@
 
 	import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.MalformedURLException;
@@ -17,6 +19,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 	import formats.Format;
 import formats.Format.OpenMode;
@@ -27,9 +30,11 @@ import formats.LineFormat;
 	
 	public class HdfsClient {
 		
-		static public String nameNodeAdresse = "localhost";
-		static public int nameNodePort = 4000;
-		static public String nameNodeName = "NameNodeDaemon";
+		static public String nameNodeIp;
+		static public int nameNodePort;
+		static public String nameNodeName;
+		static public String config_path = "../config/namenode.properties";
+		static public boolean loaded = false;
 		
 		public static int chunk_size;
 		
@@ -40,13 +45,38 @@ import formats.LineFormat;
 	    }
 		
 	   
+	    public static void loadConfig(String path) {
+	        	//load namenode config
+	        	
+	    		if(!loaded)
+	    		{
+	    			loaded = true;
+	    			Properties prop = new Properties();
+		            InputStream input = null;
+		            try {
+		            	input = new FileInputStream(config_path);
+		                prop.load(input);
+		                
+		                nameNodeIp = prop.getProperty("ip");
+		                nameNodePort = Integer.parseInt(prop.getProperty("port"));
+		                nameNodeName = prop.getProperty("name");
+		                
+		            } catch (IOException ex) {
+		                ex.printStackTrace();
+		            }
+
+	    		}
+	            	        
+	    }
+	    
 	    
 	    public static void HdfsWrite(Format.Type fmt, String localFSSourceFname, 
 	     int repFactor) {
 	    	try {
 	    		
 	    		//get datanodes
-	    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+	    		loadConfig(config_path);
+	    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
 	            List<DataNodeInfo> dataNodes = nameNode.getDataNodesInfo();
 	    		
 	
@@ -130,12 +160,14 @@ import formats.LineFormat;
     	
     }
 
-    public static void HdfsRead(String hdfsFname, String localFSDestFname) {
+    public static void HdfsRead(String hdfsFname, String localFSDestFname, boolean isMap) {
     	//TODO gerer hdfsFname et localDSDestFname
     	
     	//get MetadataFile
 		try {
-			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+
+			loadConfig(config_path);
+			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
 			MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 			
 			Format format = FormatFactory.getFormat(metadataFile.getFmt());
@@ -148,7 +180,14 @@ import formats.LineFormat;
 			{
 				DataNodeInfo datanode = chunk.getDatanode();
 				Socket client = new Socket(datanode.getIp(),datanode.getPort());
-				Commande cmd = new Commande(NumCommande.CMD_READ,chunk.getHandle(),metadataFile.getFmt());
+				String handle = chunk.getHandle();
+				if(isMap)
+				{
+					String i = handle.substring(handle.length()-1,handle.length());
+					handle = handle.substring(0,handle.length()-1);
+					handle += "_inter"+i;
+				}
+				Commande cmd = new Commande(NumCommande.CMD_READ,handle,metadataFile.getFmt());
 				
 				ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
     			oos.writeObject(cmd);
@@ -179,7 +218,8 @@ import formats.LineFormat;
 			try {
 				
 				//get MetadataFile
-				NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
+				loadConfig(config_path);
+				NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
 				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 			
 				List<MetadataChunk> chunks = metadataFile.getChunks();
@@ -203,16 +243,14 @@ import formats.LineFormat;
 	    }
 
     public static void main(String[] args) {
-        
-    	//tests(args[0]);
-    	
+          	
         try {
             if (args.length<2) {usage(); return;}
 
             switch (args[0]) {
               case "read":
             	  if (args.length<3) {usage(); return;}
-            	  HdfsRead(args[1],args[2]); break;
+            	  HdfsRead(args[1],args[2],false); break;
               case "delete": HdfsDelete(args[1]); break;
               case "write": 
                 Format.Type fmt;
@@ -227,46 +265,5 @@ import formats.LineFormat;
         }
     }
     
-    public static void tests(String fileName)
-    {
-    	// java HdfsClient <read|write> <line|kv> <file>
-    	/*KVFormat kvf = new KVFormat();
-    	kvf.setFname("data/testKVRead.txt");
-    	kvf.open(OpenMode.R);
-    	System.out.println(kvf.read());
-    	*/
-    	
-    	/*KVFormat kvf = new KVFormat();
-    	kvf.setFname("data/testkvWrite.txt");
-    	kvf.open(OpenMode.W);
-    	KV record = new KV("k","v");
-    	kvf.write(record);
-    	kvf.write(record);
-    	kvf.close();*/
-    	
-    	/*LineFormat linef = new LineFormat();
-    	linef.setFname("data/filesample.txt");
-    	linef.open(OpenMode.R);
-    	System.out.println(linef.read());
-    	System.out.println(linef.read());*/
-    	
-    	try {
-			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeAdresse+":"+nameNodePort+"/"+nameNodeName);
-			MetadataFile file = nameNode.getMetaDataFile(fileName);
-			System.out.println(file);
-			for(MetadataChunk chunk : file.getChunks())
-			{
-				System.out.println(chunk);
-				
-			}
-			
-		} catch (MalformedURLException | RemoteException | NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	
-    }
-    
-
+   
 }
