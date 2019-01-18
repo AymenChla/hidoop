@@ -1,0 +1,5 @@
+* Communiquer les adresses des daemons avec le NameNode
+** Récupérer les adresses des Damons via le NameNode
+	NB: ces deux remarques ont pour but de dynamiser notre programme afin qu'il soit capable de façon dynamique les damons lancés
+
+*** Charger les données du NameNode à partir d'un fichier de configuration

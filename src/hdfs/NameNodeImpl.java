@@ -1,6 +1,9 @@
 package hdfs;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
@@ -8,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import formats.Format;
 import formats.Format.OpenMode;
@@ -20,11 +24,32 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	private List<DataNodeInfo> dataNodesInfos;
 	private List<DataNodeInfo> daemons;
 	private String metaDataPath = "../data/";
+	static public String config_path = "../config/namenode.properties";
 	
 	protected NameNodeImpl() throws RemoteException {
 		super();
 		dataNodesInfos = new ArrayList<DataNodeInfo>();
 		daemons = new ArrayList<DataNodeInfo>();
+	}
+	
+	
+	public static void loadConfig(String path) {
+    	//load namenode config
+    	
+        Properties prop = new Properties();
+        InputStream input = null;
+        try {
+        	input = new FileInputStream(config_path);
+            prop.load(input);
+            
+            
+            port = Integer.parseInt(prop.getProperty("port"));
+            
+            
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+    
 	}
 
 	
@@ -38,6 +63,7 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	public static void main(String args[])
 	{
 		try {
+			loadConfig(config_path);
 			NameNode nameNodeDeamon = new NameNodeImpl();
 			LocateRegistry.createRegistry(port);
 			Naming.rebind("//localhost:" + port + "/NameNodeDaemon", nameNodeDeamon);

@@ -1,0 +1,37 @@
+deploiement serveurs:
+	
+	nameNode:
+		java hdfs.NameNodeImpl
+	dataNodes:
+		java hdfs.HdfsServer localhost 1995
+		java hdfs.HdfsServer localhost 1996
+		java hdfs.HdfsServer localhost 1997
+	
+	daemons:
+		java ordo.DaemonImpl m1 localhost 2010
+		java ordo.DaemonImpl m2 localhost 2011
+		java ordo.DaemonImpl m3 localhost 2012
+
+scenario HDFS: 
+
+	WRITE:
+		java hdfs.HdfsClient write line ../data/filesample
+	READ:
+		java hdfs.HdfsClient read ../data/filesample ../data/destFile
+		diff ../data/filesample ../data/destFile
+	
+	DELETE:
+		java hdfs.HdfsClient delete ../data/filesample
+
+scenario MAP/REDUCE:
+	
+	java application.MyMapReduce ../data/filesample
+	diff ../data
+	diff ../data/filesample_resultat ../data/filesample.txt-res
+	
+	
+	
+
+
+
+
