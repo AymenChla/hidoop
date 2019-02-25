@@ -10,6 +10,7 @@ import java.io.Reader;
 
 public class KVFormat implements Format{
 	
+	private String path = "/tmp/";
 	private String fname;
 	private long index;
 	private OpenMode mode;
@@ -80,7 +81,7 @@ public class KVFormat implements Format{
 		else if(mode == Format.OpenMode.W)
 		{
 			try {
-				pw = new PrintWriter(new FileWriter(fname));
+				pw = new PrintWriter(new FileWriter(path+fname));
 			} catch (IOException e) {
 				
 				e.printStackTrace();

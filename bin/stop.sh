@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERNAME=freenemya
+USERNAME=achla
 
 #loading namenode config
 file="../config/namenode.properties"

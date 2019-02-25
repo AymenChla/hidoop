@@ -11,6 +11,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -70,10 +72,11 @@ public class Job implements JobInterfaceX{
 		loadConfig(config_path);
 		NameNode nameNode;
 		try {
-			nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+			Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+			nameNode = (NameNode) registry.lookup(nameNodeName);
 			this.machines = nameNode.getDaemons();
 			
-		} catch (MalformedURLException | RemoteException | NotBoundException e1) {
+		} catch (RemoteException | NotBoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}

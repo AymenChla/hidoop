@@ -87,7 +87,8 @@ public class DaemonImpl  extends UnicastRemoteObject implements Daemon{
 			//register daemon
 			loadConfig(config_path);
 			DataNodeInfo dataNodeInfo= new DataNodeInfo(ip,port,name);
-			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+			Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+			NameNode nameNode = (NameNode) registry.lookup(nameNodeName);
 			nameNode.addDaemon(dataNodeInfo);
 			
 			

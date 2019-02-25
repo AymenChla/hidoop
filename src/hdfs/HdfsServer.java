@@ -10,6 +10,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Properties;
 
 import formats.Format;
@@ -162,7 +164,8 @@ public class HdfsServer extends Thread{
 			//register datanode
 			loadConfig(config_path);
 			DataNodeInfo dataNodeInfo= new DataNodeInfo(ip,port);
-			NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+			Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+			NameNode nameNode = (NameNode) registry.lookup(nameNodeName);
 			nameNode.addDataNodeInfo(dataNodeInfo);
 			
 			ServerSocket server = new ServerSocket(port);

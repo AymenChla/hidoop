@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USERNAME=freenemya
+USERNAME=achla
 
 #loading namenode config
 file="../config/namenode.properties"
@@ -22,7 +22,7 @@ fi
 NAMENODE_HOST=${ip}
 
 #launching nameNode
-SCRIPT="pwd; cd workspace/hidoop/bin; java hdfs.NameNodeImpl"
+SCRIPT="cd workspace/hidoop/bin; screen -d -m java hdfs.NameNodeImpl"
 #ssh-keygen -t rsa -b 2048
 #ssh-copy-id $USERNAME@$NAMENODE_HOST
 ssh -l ${USERNAME} ${NAMENODE_HOST} "${SCRIPT}"
@@ -38,7 +38,7 @@ then
 	NB_HOSTS=${#hostArr[@]}
 
 	
-	SCRIPT="pwd; cd workspace/hidoop/bin; java hdfs.HdfsServer" 
+	SCRIPT="cd workspace/hidoop/bin; screen -d -m java hdfs.HdfsServer" 
 	for (( i=0; i<${NB_HOSTS}; i++ ))
 	do
 
@@ -49,7 +49,7 @@ then
 
 	   #ssh-copy-id $USERNAME@${HOSTS[$i]}
 	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal}"
-	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal}"
+	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal} &"
 
 	done
 else

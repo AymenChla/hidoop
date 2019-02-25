@@ -17,6 +17,8 @@ import java.net.UnknownHostException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -77,7 +79,8 @@ import formats.LineFormat;
 	    		
 	    		//get datanodes
 	    		loadConfig(config_path);
-	    		NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+	    		Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+				NameNode nameNode = (NameNode) registry.lookup(nameNodeName);
 	            List<DataNodeInfo> dataNodes = nameNode.getDataNodesInfo();
 	    		
 	
@@ -195,7 +198,8 @@ import formats.LineFormat;
 			loadConfig(config_path);
 			NameNode nameNode;
 			try {
-				nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+				Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+				nameNode = (NameNode) registry.lookup(nameNodeName);
 				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 				Format format = FormatFactory.getFormat(metadataFile.getFmt());
 				
@@ -261,7 +265,7 @@ import formats.LineFormat;
 				format.close();
 
 				
-			} catch (MalformedURLException | RemoteException
+			} catch (RemoteException
 					| NotBoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -280,7 +284,8 @@ import formats.LineFormat;
 				
 				//get MetadataFile
 				loadConfig(config_path);
-				NameNode nameNode = (NameNode) Naming.lookup("//"+nameNodeIp+":"+nameNodePort+"/"+nameNodeName);
+				Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+				NameNode nameNode = (NameNode) registry.lookup(nameNodeName);
 				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 			
 				List<MetadataChunk> chunks = metadataFile.getChunks();
