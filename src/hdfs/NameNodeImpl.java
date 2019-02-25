@@ -127,9 +127,17 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 		while((record = lineFormat.read()) != null)
 		{
 			String[] infoChunk = record.v.split(":");
-			DataNodeInfo datanode = new DataNodeInfo(infoChunk[3], Integer.parseInt(infoChunk[4]));
-			System.out.println(datanode);
-			chunks.add(new MetadataChunk(infoChunk[0], Long.parseLong(infoChunk[1]), Integer.parseInt(infoChunk[2]), datanode));
+			
+			int repFactor = Integer.parseInt(infoChunk[2]);
+			MetadataChunk metadataChunk = new MetadataChunk(infoChunk[0], Long.parseLong(infoChunk[1]), repFactor);
+			for(int i=0 ; i < repFactor; i++)
+			{
+				metadataChunk.addDatanode(new DataNodeInfo(infoChunk[3+2*i], Integer.parseInt(infoChunk[4+2*i])));
+			}
+			
+			//System.out.println(datanode);
+			//chunks.add(new MetadataChunk(infoChunk[0], Long.parseLong(infoChunk[1]), Integer.parseInt(infoChunk[2]), datanode));
+			chunks.add(metadataChunk);
 		}
 		lineFormat.close();
 		

@@ -1,6 +1,8 @@
 package hdfs;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MetadataChunk implements Serializable{
@@ -12,17 +14,25 @@ public class MetadataChunk implements Serializable{
 	private String handle;
 	private long chunk_size;
 	private int repFactor;
-	private DataNodeInfo datanode;
+	private List<DataNodeInfo> datanodes;
 	
 	
 
+	public MetadataChunk(String handle, long chunk_size, int repFactor) {
+		super();
+		this.handle = handle;
+		this.chunk_size = chunk_size;
+		this.repFactor = repFactor;
+		this.datanodes = new ArrayList<DataNodeInfo>();
+	}
+	
 	public MetadataChunk(String handle, long chunk_size, int repFactor,
 			DataNodeInfo datanode) {
 		super();
 		this.handle = handle;
 		this.chunk_size = chunk_size;
 		this.repFactor = repFactor;
-		this.datanode = datanode;
+		//this.datanode = datanode;
 	}
 
 	public String getHandle() {
@@ -49,18 +59,21 @@ public class MetadataChunk implements Serializable{
 		this.repFactor = repFactor;
 	}
 
-	public DataNodeInfo getDatanode() {
-		return datanode;
+	public List<DataNodeInfo> getDatanodes() {
+		return datanodes;
 	}
 
-	public void setDatanode(DataNodeInfo datanode) {
-		this.datanode = datanode;
+	public void addDatanode(DataNodeInfo datanode) {
+		this.datanodes.add(datanode);
 	}
 
 	@Override
 	public String toString() {
-		return handle + ":" + chunk_size
-				+ ":" + repFactor + ":" + datanode;
+		String res =  handle + ":" + chunk_size
+				+ ":" + repFactor;
+		for(int i=0 ; i < datanodes.size(); i++)
+			res += ":" + datanodes.get(i);
+		return res;
 	}
 	
 	
