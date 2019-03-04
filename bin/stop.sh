@@ -46,3 +46,25 @@ do
 done
 
 
+
+#loading daemons config
+filename=../config/daemons.properties
+hostArr=($(grep "host" $filename)) 
+portArr=($(grep "port" $filename))
+nameArr=($(grep "name" $filename))
+NB_HOSTS=${#hostArr[@]}
+
+
+#stop datanodes
+SCRIPT="fuser -k"
+for (( i=0; i<${NB_HOSTS}; i++ ))
+do
+    hostVal=$(cut -d"=" -f2 <<< ${hostArr[i]})
+    portVal=$(cut -d"=" -f2 <<< ${portArr[i]})
+    nameVal=$(cut -d"=" -f2 <<< ${nameArr[i]})
+	
+    ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${portVal}/tcp"
+
+done
+
+

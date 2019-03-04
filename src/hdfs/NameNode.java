@@ -13,4 +13,7 @@ public interface NameNode extends Remote{
 	
 	public List<DataNodeInfo> getDaemons() throws RemoteException;
 	public void addDaemon(DataNodeInfo info) throws RemoteException;
+	
+	public List<DataNodeInfo> getNodeManagers() throws RemoteException;
+	public void addNodeManager(DataNodeInfo info) throws RemoteException; 
 }

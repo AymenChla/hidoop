@@ -23,6 +23,7 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	static private int port = 4000;
 	private List<DataNodeInfo> dataNodesInfos;
 	private List<DataNodeInfo> daemons;
+	private List<DataNodeInfo> nodeManagers;
 	private String metaDataPath = "../data/";
 	static public String config_path = "../config/namenode.properties";
 	
@@ -30,6 +31,7 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 		super();
 		dataNodesInfos = new ArrayList<DataNodeInfo>();
 		daemons = new ArrayList<DataNodeInfo>();
+		nodeManagers = new ArrayList<DataNodeInfo>();
 	}
 	
 	
@@ -159,4 +161,18 @@ public class NameNodeImpl extends UnicastRemoteObject implements NameNode{
 	public List<DataNodeInfo> getDaemons() {
 		return daemons;
 	}
+
+
+	@Override
+	public void addNodeManager(DataNodeInfo info) throws RemoteException {
+		this.nodeManagers.add(info);
+	}
+
+
+	@Override
+	public List<DataNodeInfo> getNodeManagers() throws RemoteException {
+		return this.nodeManagers;
+	}
+	
+	
 }

@@ -47,14 +47,45 @@ then
 	    
 	   #launching datanodes
 
-	   #ssh-copy-id $USERNAME@${HOSTS[$i]}
-	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal}"
-	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal} &"
+	   #ssh-copy-id $USERNAME@$hostVal
+	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal}"
+	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal} &"
 
 	done
 else
   echo "$filename not found."
 fi
+
+#loading daemons config
+filename="../config/daemons.properties"
+if [ -f "$filename" ]
+then
+  echo "$filename found."
+	hostDaemonArr=($(grep "host" $filename)) 
+	portDaemonArr=($(grep "port" $filename))
+	nameDaemonArr=($(grep "name" $filename))
+	NB_DAEMONS=${#hostDaemonArr[@]}
+
+	
+	SCRIPT="cd workspace/hidoop/bin; screen -d -m java ordo.DaemonImpl" 
+	for (( i=0; i<${NB_DAEMONS}; i++ ))
+	do
+
+	    hostDaemonVal=$(cut -d"=" -f2 <<< ${hostDaemonArr[i]})
+	    portDaemonVal=$(cut -d"=" -f2 <<< ${portDaemonArr[i]})
+	    nameDaemonVal=$(cut -d"=" -f2 <<< ${nameDaemonArr[i]})
+	    
+	   #launching datanodes
+
+	   #ssh-copy-id $USERNAME@$hostDaemonVal
+	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${nameDaemonVal} ${hostDaemonVal} ${portDaemonVal}"
+	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostDaemonVal} ${portDaemonVal} &"
+
+	done
+else
+  echo "$filename not found."
+fi
+
 
 
 
