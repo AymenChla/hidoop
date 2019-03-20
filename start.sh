@@ -3,10 +3,10 @@
 USERNAME=achla
 
 #loading namenode config
-file="../config/namenode.properties"
+file="config/namenode.properties"
 if [ -f "$file" ]
 then
-  echo "$file found."
+  #echo "$file found."
 
   while IFS='=' read -r key value
   do
@@ -14,25 +14,27 @@ then
     eval ${key}=\${value}
   done < "$file"
 
-  echo "namenode Ip       = " ${ip}
-  echo "namenode port = " ${port}
+  #echo "namenode Ip       = " ${ip}
+  #echo "namenode port = " ${port}
 else
   echo "$file not found."
 fi
 NAMENODE_HOST=${ip}
+NAMENODE_PORT=${port}
 
 #launching nameNode
 SCRIPT="cd workspace/hidoop/bin; screen -d -m java hdfs.NameNodeImpl"
 #ssh-keygen -t rsa -b 2048
 #ssh-copy-id $USERNAME@$NAMENODE_HOST
 ssh -l ${USERNAME} ${NAMENODE_HOST} "${SCRIPT}"
-
+echo "nameNode started at:  ${NAMENODE_HOST}:${NAMENODE_PORT}"
+echo "---------------------------------------------"
 
 #loading datanodes config
-filename="../config/datanodes.properties"
+filename="config/datanodes.properties"
 if [ -f "$filename" ]
 then
-  echo "$filename found."
+  #echo "$filename found."
 	hostArr=($(grep "host" $filename)) 
 	portArr=($(grep "port" $filename))
 	NB_HOSTS=${#hostArr[@]}
@@ -50,17 +52,18 @@ then
 	   #ssh-copy-id $USERNAME@$hostVal
 	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal}"
 	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostVal} ${portVal} &"
-
+	   echo "datanode started at:  ${hostVal}:${portVal}"
+	   echo "---------------------------------------------"
 	done
 else
-  echo "$filename not found."
+  ec	ho "$filename not found."
 fi
 
 #loading daemons config
-filename="../config/daemons.properties"
+filename="config/daemons.properties"
 if [ -f "$filename" ]
 then
-  echo "$filename found."
+  #echo "$filename found."
 	hostDaemonArr=($(grep "host" $filename)) 
 	portDaemonArr=($(grep "port" $filename))
 	nameDaemonArr=($(grep "name" $filename))
@@ -78,9 +81,10 @@ then
 	   #launching datanodes
 
 	   #ssh-copy-id $USERNAME@$hostDaemonVal
-	   ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${nameDaemonVal} ${hostDaemonVal} ${portDaemonVal}"
-	   #ssh -l ${USERNAME} ${hostVal} "${SCRIPT} ${hostDaemonVal} ${portDaemonVal} &"
-
+	   ssh -l ${USERNAME} ${hostDaemonVal} "${SCRIPT} ${nameDaemonVal} ${hostDaemonVal} ${portDaemonVal}"
+	   #ssh -l ${USERNAME} ${hostDaemonVal} "${SCRIPT} ${hostDaemonVal} ${portDaemonVal} &"
+	   echo "daemon	 started at:  ${hostDaemonVal}:${portDaemonVal}"
+     	   echo "---------------------------------------------"
 	done
 else
   echo "$filename not found."

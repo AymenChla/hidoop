@@ -10,7 +10,7 @@ import java.io.Reader;
 
 public class LineFormat implements Format{
 	
-	private String path="/tmp/";
+	private String path = "../data/";
 	private String fname;
 	private long index;
 	private OpenMode mode;
