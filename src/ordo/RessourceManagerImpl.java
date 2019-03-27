@@ -10,6 +10,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -19,63 +21,28 @@ import hdfs.NameNodeImpl;
 
 public class RessourceManagerImpl extends UnicastRemoteObject implements RessourceManager{
 	
-	NameNode nameNode = null;
-	List<DataNodeInfo> machines = null;
+	List<DataNodeInfo> reducers;
+	HashSet<String> keys;
+	List<DataNodeInfo> nodeManagers;
 	
-	static private int port = 4001;
-	private List<DataNodeInfo> dataNodesInfos;
-	private List<DataNodeInfo> daemons;
-	private List<DataNodeInfo> nodeManagers;
-	private String metaDataPath = "../data/";
-	static public String nameNodeIp;
-	static public int nameNodePort;
-	static public String nameNodeName;
-	static public String config_path_nameNode = "../config/namenode.properties";
-	static public String config_path_rm = "../config/ressourcemanager.properties";
+	static public String config_path = "../config/ressourcemanager.properties";
+	static private int port;
 	
-	public RessourceManagerImpl() throws RemoteException 
-	{
-		loadConfigNameNode(config_path_nameNode);
-		Registry registry;
-		try {
-			registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
-			this.nameNode = (NameNode) registry.lookup(nameNodeName);
-			
-		} catch (RemoteException | NotBoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	protected RessourceManagerImpl() throws RemoteException {
+		super();
+		reducers = new ArrayList<DataNodeInfo>();
+		keys = new HashSet<String>();
+		nodeManagers  = new ArrayList<DataNodeInfo>();
 		
 	}
 	
-	public static void loadConfigNameNode(String path) {
+	public static void loadConfig(String path) {
     	//load namenode config
     	
         Properties prop = new Properties();
         InputStream input = null;
         try {
-        	input = new FileInputStream(config_path_nameNode);
-            prop.load(input);
-            
-            nameNodeIp = prop.getProperty("ip");
-            nameNodePort = Integer.parseInt(prop.getProperty("port"));
-            nameNodeName = prop.getProperty("name");
-            
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    
-	}
-	
-
-	
-	public static void loadConfigRM(String path) {
-    	//load namenode config
-    	
-        Properties prop = new Properties();
-        InputStream input = null;
-        try {
-        	input = new FileInputStream(config_path_rm);
+        	input = new FileInputStream(config_path);
             prop.load(input);
             
             
@@ -89,29 +56,51 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	}
 	
 	@Override
-	public void setLocalRessource() throws RemoteException {
-		// TODO Auto-generated method stub
+	public List<DataNodeInfo> getAvailableReducers() throws RemoteException {
 		
+		return reducers;
 	}
 
 	@Override
-	public List<DataNodeInfo> getAvailableDaemons() throws RemoteException {
+	public void addReducer(DataNodeInfo reducer) throws RemoteException {
+		reducers.add(reducer);
 		
-		return this.nameNode.getDaemons();
-			
 	}
+	
 	
 	public static void main(String args[])
 	{
 		try {
-			loadConfigRM(config_path_rm);
+			loadConfig(config_path);
 			RessourceManager rm = new RessourceManagerImpl();
 			LocateRegistry.createRegistry(port);
-			Naming.rebind("//localhost:" + port + "/RessourceManagerDaemon", rm);
+			Naming.rebind("//localhost:" + port + "/RessourceManager", rm);
 			
 		} catch (RemoteException | MalformedURLException e) {
 			e.printStackTrace();
 		}
 		
 	}
+
+	@Override
+	public void addReducerKeys(HashSet<String> keys) throws RemoteException {
+		
+		keys.addAll(keys);
+	}
+
+	@Override
+	public List<DataNodeInfo> getNodeManagers() throws RemoteException {
+
+		return nodeManagers;
+	}
+
+	@Override
+	public void addNodeManager(DataNodeInfo info) throws RemoteException {
+		this.nodeManagers.add(info);
+		
+	}
+	
+	
+	
+	
 }

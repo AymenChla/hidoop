@@ -26,6 +26,30 @@ NAMENODE_PORT=${port}
 SCRIPT="fuser -k ${NAMENODE_PORT}/tcp"
 ssh -l ${USERNAME} ${NAMENODE_HOST} "${SCRIPT}"
 
+#loading namenode config
+file="config/ressourcemanager.properties"
+if [ -f "$file" ]
+then
+  echo "$file found."
+
+  while IFS='=' read -r key value
+  do
+    key=$(echo $key)
+    eval ${key}=\${value}
+  done < "$file"
+
+  echo "User Id       = " ${ip}
+  echo "user password = " ${port}
+else
+  echo "$file not found."
+fi
+RM_HOST=${ip}
+RM_PORT=${port}
+
+#stop nameNode
+SCRIPT="fuser -k ${RM_PORT}/tcp"
+ssh -l ${USERNAME} ${RM_HOST} "${SCRIPT}"
+
 
 #loading datanodes config
 filename=config/datanodes.properties
@@ -48,7 +72,7 @@ done
 
 
 #loading daemons config
-filename=config/daemons.properties
+filename=config/nodemanagers.properties
 hostDArr=($(grep "host" $filename)) 
 portDArr=($(grep "port" $filename))
 nameDArr=($(grep "name" $filename))

@@ -6,12 +6,12 @@ import map.Mapper;
 
 public class MapThread extends Thread{
 	
-	Daemon deamon; //deamon sur lequel on va lancer le runMap
-	Mapper m; //map à lancer
-	Format reader, writer; //les formats de lecture et d'écriture
+	NodeManager deamon; //deamon sur lequel on va lancer le runMap
+	Mapper m; //map ï¿½ lancer
+	Format reader, writer; //les formats de lecture et d'ï¿½criture
 	CallBack cb;
 	
-	public MapThread(Daemon deamon, Mapper m, Format reader, Format writer, CallBack cb) {
+	public MapThread(NodeManager deamon, Mapper m, Format reader, Format writer, CallBack cb) {
 		this.deamon = deamon;
 		this.m = m;
 		this.reader = reader;

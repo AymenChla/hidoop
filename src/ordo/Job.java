@@ -35,10 +35,11 @@ public class Job implements JobInterfaceX{
 	private List<DataNodeInfo> machines;
 	static private int port = 4080;
 	
-	static public String nameNodeIp;
-	static public int nameNodePort;
-	static public String nameNodeName;
-	static public String config_path = "../config/namenode.properties";
+	
+	static public String rmIp ;
+	static public int rmPort;
+	static public String rmName;
+	static public String config_path_rm = "../config/ressourcemanager.properties";
 	
 	public Job() {
 		this.numberOfReduces = 1;
@@ -48,33 +49,33 @@ public class Job implements JobInterfaceX{
 
 	}
 	
-	public static void loadConfig(String path) {
+	public static void loadConfig_rm(String path) {
     	//load namenode config
     	
         Properties prop = new Properties();
         InputStream input = null;
         try {
-        	input = new FileInputStream(config_path);
+        	input = new FileInputStream(path);
             prop.load(input);
             
-            nameNodeIp = prop.getProperty("ip");
-            nameNodePort = Integer.parseInt(prop.getProperty("port"));
-            nameNodeName = prop.getProperty("name");
+            rmIp = prop.getProperty("ip");
+            rmPort = Integer.parseInt(prop.getProperty("port"));
+            rmName = prop.getProperty("name");
             
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     
-}
+	}
 	
 	public void initMachines(){
 		//get daemons
-		loadConfig(config_path);
-		NameNode nameNode;
+		loadConfig_rm(config_path_rm);
+		
 		try {
-			Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
-			nameNode = (NameNode) registry.lookup(nameNodeName);
-			this.machines = nameNode.getDaemons();
+			Registry registry = LocateRegistry.getRegistry(rmIp,rmPort);
+			RessourceManager rm = (RessourceManager) registry.lookup(rmName);
+			this.machines = rm.getNodeManagers();
 			
 		} catch (RemoteException | NotBoundException e1) {
 			// TODO Auto-generated catch block
@@ -124,12 +125,12 @@ public class Job implements JobInterfaceX{
 		
         
 		
-    	List<Daemon> demons = new ArrayList<>();
+    	List<NodeManager> demons = new ArrayList<>();
     	for(int i = 0; i < this.numberOfMaps; i++) {
     		try {
 
-    			System.out.println("On se connecte � : " + "//localhost:/"+port+"Daemon_" + machines.get(i));
-				demons.add((Daemon) Naming.lookup("//"+machines.get(i).getIp()+":"+machines.get(i).getPort()+"/Daemon_"+machines.get(i).getName()));
+    			System.out.println("On se connecte � : " + "//localhost:/"+port+"NodeManager_" + machines.get(i));
+				demons.add((NodeManager) Naming.lookup("//"+machines.get(i).getIp()+":"+machines.get(i).getPort()+"/NodeManager_"+machines.get(i).getName()));
 				
 			} catch (Exception e) { 
 				e.printStackTrace();
@@ -149,7 +150,7 @@ public class Job implements JobInterfaceX{
 		System.out.println("Lancement des Maps");
 		
 		for(int i = 0; i < this.numberOfMaps; i++) {
-			Daemon d = demons.get(i);
+			NodeManager d = demons.get(i);
 			
 			//  Pour chaque Daemon, on change le nom des formats pour qu'elles aient des noms diff�rents.
 			Format temp;

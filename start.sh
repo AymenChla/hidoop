@@ -30,6 +30,39 @@ ssh -l ${USERNAME} ${NAMENODE_HOST} "${SCRIPT}"
 echo "nameNode started at:  ${NAMENODE_HOST}:${NAMENODE_PORT}"
 echo "---------------------------------------------"
 
+
+
+#loading ressourceManager config
+file="config/ressourcemanager.properties"
+if [ -f "$file" ]
+then
+  #echo "$file found."
+
+  while IFS='=' read -r key value
+  do
+    key=$(echo $key)
+    eval ${key}=\${value}
+  done < "$file"
+
+  #echo "namenode Ip       = " ${ip}
+  #echo "namenode port = " ${port}
+else
+  echo "$file not found."
+fi
+RM_HOST=${ip}
+RM_PORT=${port}
+
+#launching nameNode
+SCRIPT="cd workspace/hidoop/bin; screen -d -m java hdfs.RessourceManagerImpl"
+#ssh-keygen -t rsa -b 2048
+#ssh-copy-id $USERNAME@$NAMENODE_HOST
+ssh -l ${USERNAME} ${RM_HOST} "${SCRIPT}"
+echo "ressourceManager started at:  ${RM_HOST}:${RM_PORT}"
+echo "---------------------------------------------"
+
+
+
+
 #loading datanodes config
 filename="config/datanodes.properties"
 if [ -f "$filename" ]
@@ -60,7 +93,7 @@ else
 fi
 
 #loading daemons config
-filename="config/daemons.properties"
+filename="config/nodemanagers.properties"
 if [ -f "$filename" ]
 then
   #echo "$filename found."
@@ -70,7 +103,7 @@ then
 	NB_DAEMONS=${#hostDaemonArr[@]}
 
 	
-	SCRIPT="cd workspace/hidoop/bin; screen -d -m java ordo.DaemonImpl" 
+	SCRIPT="cd workspace/hidoop/bin; screen -d -m java ordo.NodeManagerImpl" 
 	for (( i=0; i<${NB_DAEMONS}; i++ ))
 	do
 
@@ -83,7 +116,7 @@ then
 	   #ssh-copy-id $USERNAME@$hostDaemonVal
 	   ssh -l ${USERNAME} ${hostDaemonVal} "${SCRIPT} ${nameDaemonVal} ${hostDaemonVal} ${portDaemonVal}"
 	   #ssh -l ${USERNAME} ${hostDaemonVal} "${SCRIPT} ${hostDaemonVal} ${portDaemonVal} &"
-	   echo "daemon	 started at:  ${hostDaemonVal}:${portDaemonVal}"
+	   echo "nodeManager started at:  ${hostDaemonVal}:${portDaemonVal}"
      	   echo "---------------------------------------------"
 	done
 else
