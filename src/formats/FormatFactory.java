@@ -4,7 +4,7 @@ public class FormatFactory {
 	
 	public static Format getFormat(Format.Type fmt)
 	{
-		Format format = null;
+		Format format = null; 
 		switch(fmt)
 		{
 			case LINE:

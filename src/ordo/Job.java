@@ -73,12 +73,16 @@ public class Job implements JobInterfaceX{
 		loadConfig_rm(config_path_rm);
 		
 		try {
-			Registry registry = LocateRegistry.getRegistry(rmIp,rmPort);
-			RessourceManager rm = (RessourceManager) registry.lookup(rmName);
+			
+			
+			
+			
+			System.out.println(rmName+"-----------------------aaaaazz\n \n ");
+			
+			RessourceManager rm = (RessourceManager) Naming.lookup("//"+rmIp+":"+rmPort+"/"+rmName);
 			this.machines = rm.getNodeManagers();
 			
-		} catch (RemoteException | NotBoundException e1) {
-			// TODO Auto-generated catch block
+		} catch (RemoteException | NotBoundException | MalformedURLException e1) {
 			e1.printStackTrace();
 		}
     	this.numberOfMaps = machines.size();

@@ -11,7 +11,7 @@ import formats.FormatReader;
 import formats.FormatWriter;
 import formats.KV;
 
-public class MyMapReduce implements MapReduce {
+public class MyMapReduce implements MapReduce {  
 	private static final long serialVersionUID = 1L;
 
 	// MapReduce program that computes word counts
@@ -19,7 +19,7 @@ public class MyMapReduce implements MapReduce {
 		
 		Map<String,Integer> hm = new HashMap<>();
 		KV kv;
-		while ((kv = reader.read()) != null) {
+		while ((kv = reader.read()) != null) { 
 			StringTokenizer st = new StringTokenizer(kv.v);
 			while (st.hasMoreTokens()) {
 				String tok = st.nextToken();

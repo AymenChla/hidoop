@@ -2,7 +2,7 @@ package formats;
 
 import java.io.Serializable;
 
-public class KV implements Serializable{
+public class KV implements Serializable{ 
 
 	/**
 	 * 

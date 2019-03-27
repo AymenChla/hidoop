@@ -113,7 +113,7 @@ public class QuasiMonteCarlo  implements MapReduce {
   @Override
   public void map(FormatReader reader, FormatWriter writer) {
 	    long nbInternes = 0;
-		long nbExternes = 0;
+		long nbExternes = 0; 
 		long debutSuite;
 		long nbPoints;
 		HaltonSequence hs;

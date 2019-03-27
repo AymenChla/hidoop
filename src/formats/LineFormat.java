@@ -73,10 +73,10 @@ public class LineFormat implements Format{
 				br = new BufferedReader(new FileReader(path+fname));
 			} catch (FileNotFoundException e) {
 				
-				e.printStackTrace(); 
+				e.printStackTrace();  
 			}
 		}
-		else if(mode == Format.OpenMode.W)
+		else if(mode == Format.OpenMode.W) 
 		{
 			try {
 				pw = new PrintWriter(new FileWriter(path+fname));

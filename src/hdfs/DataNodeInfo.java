@@ -12,7 +12,7 @@ public class DataNodeInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	private String ip;
 	private int port;
-	private String name;
+	private String name; 
 	
 	
 	public DataNodeInfo(String ip, int port) {

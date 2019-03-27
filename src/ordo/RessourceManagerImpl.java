@@ -27,6 +27,8 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	
 	static public String config_path = "../config/ressourcemanager.properties";
 	static private int port;
+	static private String rmName;
+	static private String rmIp;
 	
 	protected RessourceManagerImpl() throws RemoteException {
 		super();
@@ -47,6 +49,8 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
             
             
             port = Integer.parseInt(prop.getProperty("port"));
+            rmName = prop.getProperty("name");
+            rmIp = prop.getProperty("ip");
             
             
         } catch (IOException ex) {
@@ -71,10 +75,13 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	public static void main(String args[])
 	{
 		try {
+			
+			
 			loadConfig(config_path);
 			RessourceManager rm = new RessourceManagerImpl();
+			System.setProperty("java.rmi.server.hostname", rmIp);
 			LocateRegistry.createRegistry(port);
-			Naming.rebind("//localhost:" + port + "/RessourceManager", rm);
+			Naming.rebind("//localhost:" + port + "/"+rmName, rm);
 			
 		} catch (RemoteException | MalformedURLException e) {
 			e.printStackTrace();

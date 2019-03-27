@@ -53,7 +53,7 @@ RM_HOST=${ip}
 RM_PORT=${port}
 
 #launching nameNode
-SCRIPT="cd workspace/hidoop/bin; screen -d -m java hdfs.RessourceManagerImpl"
+SCRIPT="cd workspace/hidoop/bin; screen -d -m java ordo.RessourceManagerImpl"
 #ssh-keygen -t rsa -b 2048
 #ssh-copy-id $USERNAME@$NAMENODE_HOST
 ssh -l ${USERNAME} ${RM_HOST} "${SCRIPT}"
