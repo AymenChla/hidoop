@@ -69,8 +69,8 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 	@Override
 	public void runMap(Mapper m, Format reader, Format writer, CallBack cb) throws RemoteException {
 		 
-		System.out.println(reader.getFname());
-		String fname = reader.getFname(); 
+		
+		String fname = writer.getFname(); 
 		
 		reader.open(Format.OpenMode.R);
 		writer.open(Format.OpenMode.W);
