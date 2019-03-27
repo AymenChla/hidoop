@@ -70,6 +70,7 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 	public void runMap(Mapper m, Format reader, Format writer, CallBack cb) throws RemoteException {
 		 
 		System.out.println(reader.getFname());
+		String fname = reader.getFname(); 
 		
 		reader.open(Format.OpenMode.R);
 		writer.open(Format.OpenMode.W);
@@ -83,7 +84,7 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		writer.close();
 	
 		KVFormat shuffle_reader = new KVFormat();
-		shuffle_reader.setFname(writer.getFname());
+		shuffle_reader.setFname(fname);
 		
 		KV kv;
 		while((kv = shuffle_reader.read()) != null)
@@ -101,8 +102,8 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		}
 		
 		KVFormat shuffle_writer = new KVFormat();
+		shuffle_writer.setFname(fname+"_shuffle");
 		shuffle_writer.open(Format.OpenMode.W);
-		shuffle_writer.setFname(shuffle_reader.getFname()+"_shuffle");
 		for (Map.Entry<String,ArrayList<String>> entry : shuffle.entrySet())
 		{
 			KV shuffle_record = new KV(entry.getKey(), entry.toString());
