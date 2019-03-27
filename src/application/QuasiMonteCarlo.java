@@ -180,7 +180,7 @@ public class QuasiMonteCarlo  implements MapReduce {
 	  Job j = new Job();
 		
       j.setInputFormat(Format.Type.LINE);
-      j.setInputFname("MonteCarlo");
+      j.setInputFname(argv[0]);
       
       // Pour le temps
       long t1 = System.currentTimeMillis();

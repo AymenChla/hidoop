@@ -70,7 +70,7 @@ public class LineFormat implements Format{
 		if(mode == Format.OpenMode.R)
 		{
 			try {
-				br = new BufferedReader(new FileReader(fname));
+				br = new BufferedReader(new FileReader(path+fname));
 			} catch (FileNotFoundException e) {
 				
 				e.printStackTrace(); 
