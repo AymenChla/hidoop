@@ -100,6 +100,17 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 			}
 		}
 		
+		KVFormat shuffle_writer = new KVFormat();
+		shuffle_writer.open(Format.OpenMode.W);
+		shuffle_writer.setFname(shuffle_reader.getFname()+"_shuffle");
+		for (Map.Entry<String,ArrayList<String>> entry : shuffle.entrySet())
+		{
+			KV shuffle_record = new KV(entry.getKey(), entry.toString());
+			shuffle_writer.write(shuffle_record);
+		}
+		
+		shuffle_reader.close();
+		shuffle_writer.close();
 		
 		try {
 			loadConfig_rm(config_path_rm);
