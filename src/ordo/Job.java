@@ -212,11 +212,17 @@ public class Job implements JobInterfaceX{
 			{
 				NodeManager d = demons.get(i);
 				System.out.println("Appel des Maps");
-				if(i==nbActifReducers-1)
-					d.setReducerKeys(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer+restKeys));
-				else 
-					d.setReducerKeys(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
 				
+				if(i==nbActifReducers-1)
+				{
+					List<String> _keys = keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer+restKeys);
+					d.setReducerKeys(_keys);
+				}
+				else 
+				{
+					List<String> _keys = keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer);
+					d.setReducerKeys(_keys);
+				}
 				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
 				reduceRunner.start();
 			
