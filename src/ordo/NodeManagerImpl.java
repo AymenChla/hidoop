@@ -81,10 +81,11 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		
 		
 		reader.close();
-		writer.close();
+		writer.close(); 
 	
 		KVFormat shuffle_reader = new KVFormat();
 		shuffle_reader.setFname(fname);
+		shuffle_reader.open(Format.OpenMode.R);
 		
 		KV kv;
 		while((kv = shuffle_reader.read()) != null)

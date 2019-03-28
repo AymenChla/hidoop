@@ -17,17 +17,15 @@ public class MyMapReduce implements MapReduce {
 	// MapReduce program that computes word counts
 	public void map(FormatReader reader, FormatWriter writer) {
 		
-		Map<String,Integer> hm = new HashMap<>();
-		KV kv;
+	
+		KV kv;   
 		while ((kv = reader.read()) != null) { 
 			StringTokenizer st = new StringTokenizer(kv.v);
 			while (st.hasMoreTokens()) {
 				String tok = st.nextToken();
-				if (hm.containsKey(tok)) hm.put(tok, hm.get(tok).intValue()+1);
-				else hm.put(tok, 1);
+				writer.write(new KV(tok,"1"));
 			}
 		}
-		for (String k : hm.keySet()) writer.write(new KV(k,hm.get(k).toString()));
 	}
 	
 	public void reduce(FormatReader reader, FormatWriter writer) {
