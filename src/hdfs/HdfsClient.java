@@ -275,7 +275,91 @@ import formats.LineFormat;
 				
         
     }
+    
+    public static void HdfsRead(String hdfsFname, String key,Format format) {
+    	    	
+    	//get MetadataFile
+		
 
+			loadConfig(config_path);
+			NameNode nameNode;
+			try {
+				Registry registry = LocateRegistry.getRegistry(nameNodeIp,nameNodePort);
+				nameNode = (NameNode) registry.lookup(nameNodeName);
+				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
+				//Format format = FormatFactory.getFormat(metadataFile.getFmt());
+				
+				//format.setFname(localFSDestFname);
+				//format.open(OpenMode.W);
+				
+				List<MetadataChunk> chunks = metadataFile.getChunks();
+				for(MetadataChunk chunk : chunks)
+				{
+					boolean done = false;
+					for(int j = 0 ; j < chunk.getDatanodes().size() && !done; j++)
+					{
+						List<DataNodeInfo> datanodes = chunk.getDatanodes();
+						Socket client = null;
+						ObjectOutputStream oos =null;
+						ObjectInputStream ois = null;
+						try {
+							client = new Socket(datanodes.get(j).getIp(),datanodes.get(j).getPort());
+							String handle = chunk.getHandle();
+							
+							String i = handle.substring(handle.length()-1,handle.length());
+							handle = handle.substring(0,handle.length()-1);
+							handle += "_"+key;
+							
+							Commande cmd = new Commande(NumCommande.CMD_READ,handle,metadataFile.getFmt());
+							
+							oos = new ObjectOutputStream(client.getOutputStream());
+			    			oos.writeObject(cmd);
+			    			
+			    			KV record = null;
+			    			ois = new ObjectInputStream(client.getInputStream());
+			    			while((record = (KV) ois.readObject()) != null)
+			    			{
+			    				format.write(record);
+			    			}
+			    			
+			    			done = true;
+						} catch (IOException | ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							//e.printStackTrace();
+						}
+						finally{
+							
+							try {
+								if(client != null)
+								client.close();
+								if(oos != null)
+								oos.close();
+								if(ois != null)
+								ois.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						
+		    		
+					}
+						 
+				}
+				
+				//format.close();
+
+				
+			} catch (RemoteException
+					| NotBoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			
+				
+        
+    }
     
     
 	public static void HdfsDelete(String hdfsFname) {

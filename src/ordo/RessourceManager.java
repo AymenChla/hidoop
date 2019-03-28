@@ -14,7 +14,7 @@ public interface RessourceManager extends Remote{
 	public void addNodeManager(DataNodeInfo info) throws RemoteException;
 	
 	
-	public List<DataNodeInfo> getAvailableReducers() throws RemoteException;
-	public void addReducer(DataNodeInfo reducer) throws RemoteException;
+
 	public void addReducerKeys(HashSet<String> keys) throws RemoteException;
+	public HashSet<String> getReducerKeys() throws RemoteException;
 }

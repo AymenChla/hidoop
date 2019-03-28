@@ -1,6 +1,8 @@
 package ordo;
 
 import hdfs.DataNodeInfo;
+import hdfs.HdfsClient;
+import hdfs.MetadataFile;
 import hdfs.NameNode;
 
 import java.io.FileInputStream;
@@ -21,9 +23,11 @@ import java.util.Map;
 import java.util.Properties;
 
 import formats.Format;
+import formats.FormatFactory;
 import formats.KV;
 import formats.KVFormat;
 import map.Mapper;
+import map.Reducer;
 
 public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager{
 	
@@ -39,6 +43,7 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 	
 	private Map<String,ArrayList<String>> shuffle;
 	private HashSet<String> keys;
+	private List<String> recuderKeys;
 
 	
 	public static void loadConfig_rm(String path) {
@@ -101,18 +106,21 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 				shuffle.put(kv.k,vlist);
 			}
 		}
+		shuffle_reader.close();
 		
-		KVFormat shuffle_writer = new KVFormat();
-		shuffle_writer.setFname(fname+"_shuffle");
-		shuffle_writer.open(Format.OpenMode.W);
 		for (Map.Entry<String,ArrayList<String>> entry : shuffle.entrySet())
 		{
-			KV shuffle_record = new KV(entry.getKey(), entry.toString());
-			shuffle_writer.write(shuffle_record);
+			KVFormat shuffle_writer = new KVFormat();
+			shuffle_writer.setFname(fname+"_"+entry.getKey());
+			shuffle_writer.open(Format.OpenMode.W);
+			for(String v:entry.getValue())
+			{
+				KV shuffle_record = new KV(entry.getKey(),v);
+				shuffle_writer.write(shuffle_record);	
+			}
+			shuffle_writer.close();
 		}
 		
-		shuffle_reader.close();
-		shuffle_writer.close();
 		
 		try {
 			loadConfig_rm(config_path_rm);
@@ -136,6 +144,46 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		
 		
 	}
+	
+	@Override
+	public void runReduce(Reducer r,String inputFname, CallBack cb,int indice_reducer) throws RemoteException {
+		
+		
+		
+		Format format = FormatFactory.getFormat(Format.Type.KV);
+		
+		format.setFname(inputFname+"_reduceInter"+indice_reducer);
+		format.open(Format.OpenMode.W);
+		
+		for(String key:this.recuderKeys)
+			HdfsClient.HdfsRead(inputFname, key, format);
+		
+				
+		format.close();
+		format.open(Format.OpenMode.R);
+		
+		KVFormat writer = new KVFormat();
+		writer.setFname(inputFname+"_resReduce"+indice_reducer);
+		writer.open(Format.OpenMode.W);
+
+		System.out.println("Lancement du reduce ...");
+		r.reduce(format, writer);
+		System.out.println("OK");
+		
+		
+		format.close();
+		writer.close(); 
+	
+		
+		
+		try {
+			cb.confirmFinishedMap();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	
 	public static void main(String args[]) {
 		
@@ -169,5 +217,12 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+	public void setReducerKeys(List<String> keys) throws RemoteException {
+		this.recuderKeys = keys;
+	}
+
+	
 
 }

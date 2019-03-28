@@ -182,6 +182,9 @@ public class QuasiMonteCarlo  implements MapReduce {
       j.setInputFormat(Format.Type.LINE);
       j.setInputFname(argv[0]);
       
+      //number of reducers
+      j.setNumberOfReduces(Integer.parseInt(argv[1]));
+      
       // Pour le temps
       long t1 = System.currentTimeMillis();
 

@@ -21,7 +21,7 @@ import hdfs.NameNodeImpl;
 
 public class RessourceManagerImpl extends UnicastRemoteObject implements RessourceManager{
 	
-	List<DataNodeInfo> reducers;
+	
 	HashSet<String> keys;
 	List<DataNodeInfo> nodeManagers;
 	
@@ -32,7 +32,6 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	
 	protected RessourceManagerImpl() throws RemoteException {
 		super();
-		reducers = new ArrayList<DataNodeInfo>();
 		keys = new HashSet<String>();
 		nodeManagers  = new ArrayList<DataNodeInfo>();
 		
@@ -59,17 +58,7 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
     
 	}
 	
-	@Override
-	public List<DataNodeInfo> getAvailableReducers() throws RemoteException {
-		
-		return reducers;
-	}
-
-	@Override
-	public void addReducer(DataNodeInfo reducer) throws RemoteException {
-		reducers.add(reducer);
-		
-	}
+	
 	
 	
 	public static void main(String args[])
@@ -105,6 +94,11 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	public void addNodeManager(DataNodeInfo info) throws RemoteException {
 		this.nodeManagers.add(info);
 		
+	}
+
+	@Override
+	public HashSet<String> getReducerKeys() throws RemoteException {
+		return this.keys;
 	}
 	
 	

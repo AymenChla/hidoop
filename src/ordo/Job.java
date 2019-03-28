@@ -14,6 +14,8 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 
@@ -40,13 +42,21 @@ public class Job implements JobInterfaceX{
 	static public int rmPort;
 	static public String rmName;
 	static public String config_path_rm = "../config/ressourcemanager.properties";
+	RessourceManager rm;
 	
 	public Job() {
 		this.numberOfReduces = 1;
 		this.sortComparator = new SortComparatorImpl();
+		loadConfig_rm(config_path_rm);
+		try {
+			this.rm = (RessourceManager) Naming.lookup("//"+rmIp+":"+rmPort+"/"+rmName);
+		} catch (MalformedURLException | RemoteException | NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.initMachines();
 		this.numberOfMaps = machines.size();
-
+		
 	}
 	
 	public static void loadConfig_rm(String path) {
@@ -69,21 +79,13 @@ public class Job implements JobInterfaceX{
 	}
 	
 	public void initMachines(){
-		//get daemons
-		loadConfig_rm(config_path_rm);
 		
 		try {
-			
-			
-			
-			
-			System.out.println(rmName+"-----------------------aaaaazz\n \n ");
-			
-			RessourceManager rm = (RessourceManager) Naming.lookup("//"+rmIp+":"+rmPort+"/"+rmName);
+				
 			this.machines = rm.getNodeManagers();
 			
-		} catch (RemoteException | NotBoundException | MalformedURLException e1) {
-			e1.printStackTrace();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
     	this.numberOfMaps = machines.size();
     	
@@ -187,9 +189,55 @@ public class Job implements JobInterfaceX{
 		
 		System.out.println("Succes");
 
-    	
+		
+		
+		cb = null;
+		try {
+			cb = new CallBackImpl();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		
+		int nbActifReducers = Math.min(this.numberOfReduces,this.machines.size());
+		//reducers
+		try {
+			List<String> keys = new ArrayList<String>(rm.getReducerKeys());
+			
+			int nbKeysPerReducer = keys.size()/nbActifReducers;
+			int restKeys = keys.size()%nbActifReducers;
+			
+			
+			
+			for(int i=0 ; i < nbActifReducers ; i++)
+			{
+				NodeManager d = demons.get(i);
+				System.out.println("Appel des Maps");
+				if(i==nbActifReducers-1)
+					d.setReducerKeys(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer+restKeys));
+				else 
+					d.setReducerKeys(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
+				
+				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
+				reduceRunner.start();
+			
+			}
+			
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("Attente du CallBack");
+		try {
+			cb.waitFinishedMap(nbActifReducers);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println("Succes");
 		// On utilise HDFS pour r�cup�rer le fichier r�sultat concat�n� dans resReduce
-    	
+	
+    	/*
     	System.out.println("R�cup�ration du fichier r�sultat final");
     	
 		HdfsClient.HdfsRead(input.getFname(), redResult.getFname(),true);
@@ -207,7 +255,7 @@ public class Job implements JobInterfaceX{
     	System.out.println("Lancement du Reduce");
     	mr.reduce(redResult, output);
     	output.close();    	
-    	
+    	*/
     	System.out.println("All Done!!!!!");
 	
 		
