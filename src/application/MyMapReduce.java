@@ -18,7 +18,7 @@ public class MyMapReduce implements MapReduce {
 	public void map(FormatReader reader, FormatWriter writer) {
 		
 	
-		KV kv;   
+		KV kv; 
 		while ((kv = reader.read()) != null) { 
 			StringTokenizer st = new StringTokenizer(kv.v);
 			while (st.hasMoreTokens()) {
