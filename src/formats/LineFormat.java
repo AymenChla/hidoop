@@ -26,20 +26,23 @@ public class LineFormat implements Format{
 		
 		if(mode == OpenMode.R)
 		{
-
-			try {
-				String nextLine = br.readLine();
-				if(nextLine != null)
-				{
-					index += nextLine.getBytes().length+1;
-					String key = Long.toString(nextNbLine);
-					nextNbLine++;
-					KV record = new KV(key,nextLine);
-					return record;
+			if(br != null)
+			{
+				try {
+					String nextLine = br.readLine();
+					if(nextLine != null)
+					{
+						index += nextLine.getBytes().length+1;
+						String key = Long.toString(nextNbLine);
+						nextNbLine++;
+						KV record = new KV(key,nextLine);
+						return record;
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			
 			
 
 		}	
@@ -52,7 +55,7 @@ public class LineFormat implements Format{
 		
 		if(mode == OpenMode.W)
 		{
-			if(record != null)
+			if(record != null && pw != null)
 			{
 				pw.println(record.v);
 	
@@ -70,7 +73,7 @@ public class LineFormat implements Format{
 		if(mode == Format.OpenMode.R)
 		{
 			try {
-				br = new BufferedReader(new FileReader(path+fname));
+				br = new BufferedReader(new FileReader(fname));
 			} catch (FileNotFoundException e) {
 				
 				e.printStackTrace();  
@@ -79,7 +82,7 @@ public class LineFormat implements Format{
 		else if(mode == Format.OpenMode.W) 
 		{
 			try {
-				pw = new PrintWriter(new FileWriter(path+fname));
+				pw = new PrintWriter(new FileWriter(fname));
 			} catch (IOException e) {
 				
 				e.printStackTrace();

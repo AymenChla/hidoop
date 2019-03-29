@@ -25,24 +25,27 @@ public class KVFormat implements Format{
 		
 		if(mode == OpenMode.R)
 		{
-
-			try {
-				String nextLine = br.readLine();
-				if(nextLine != null)
-				{
-					index += nextLine.getBytes().length+1;
-					int index_sep = nextLine.indexOf(KV.SEPARATOR);
-					if( index_sep >= 0)
+			if(br != null)
+			{
+				try {
+					String nextLine = br.readLine();
+					if(nextLine != null)
 					{
-						String key = nextLine.substring(0,index_sep);
-						String value = nextLine.substring(index_sep+KV.SEPARATOR.length());
-						KV kv = new KV(key,value);
-						return kv;
+						index += nextLine.getBytes().length+1;
+						int index_sep = nextLine.indexOf(KV.SEPARATOR);
+						if( index_sep >= 0)
+						{
+							String key = nextLine.substring(0,index_sep);
+							String value = nextLine.substring(index_sep+KV.SEPARATOR.length());
+							KV kv = new KV(key,value);
+							return kv;
+						}
 					}
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
+			
 			
 
 		}	
@@ -55,7 +58,7 @@ public class KVFormat implements Format{
 		
 		if(mode == OpenMode.W)
 		{
-			if(record != null)
+			if(record != null && pw != null)
 			{
 				pw.println(record.k + KV.SEPARATOR + record.v);	
 	
@@ -72,7 +75,7 @@ public class KVFormat implements Format{
 		if(mode == Format.OpenMode.R)
 		{
 			try {
-				br = new BufferedReader(new FileReader(path+fname));
+				br = new BufferedReader(new FileReader(fname));
 			} catch (FileNotFoundException e) {
 				
 				e.printStackTrace(); 
@@ -81,7 +84,7 @@ public class KVFormat implements Format{
 		else if(mode == Format.OpenMode.W)
 		{
 			try {
-				pw = new PrintWriter(new FileWriter(path+fname));
+				pw = new PrintWriter(new FileWriter(fname));
 			} catch (IOException e) {
 				
 				e.printStackTrace(); 

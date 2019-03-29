@@ -6,6 +6,7 @@
 	import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -308,19 +309,21 @@ import formats.LineFormat;
 							
 							String i = handle.substring(handle.length()-1,handle.length());
 							handle = handle.substring(0,handle.length()-1);
-							handle += "_"+key;
+							handle += "_inter"+i+"_"+key;
 							
-							Commande cmd = new Commande(NumCommande.CMD_READ,handle,metadataFile.getFmt());
+							Commande cmd = new Commande(NumCommande.CMD_READ,handle,Format.Type.KV);
 							
 							oos = new ObjectOutputStream(client.getOutputStream());
 			    			oos.writeObject(cmd);
 			    			
 			    			KV record = null;
 			    			ois = new ObjectInputStream(client.getInputStream());
+			    			
 			    			while((record = (KV) ois.readObject()) != null)
 			    			{
 			    				format.write(record);
 			    			}
+			    			
 			    			
 			    			done = true;
 						} catch (IOException | ClassNotFoundException e) {

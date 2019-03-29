@@ -45,7 +45,7 @@ public class Job implements JobInterfaceX{
 	RessourceManager rm;
 	
 	public Job() {
-		this.numberOfReduces = 1;
+		
 		this.sortComparator = new SortComparatorImpl();
 		loadConfig_rm(config_path_rm);
 		try {
@@ -198,6 +198,7 @@ public class Job implements JobInterfaceX{
 			e.printStackTrace();
 		}
 		
+		System.out.println("Lancement des Reduces");
 		int nbActifReducers = Math.min(this.numberOfReduces,this.machines.size());
 		//reducers
 		try {
@@ -215,12 +216,12 @@ public class Job implements JobInterfaceX{
 				
 				if(i==nbActifReducers-1)
 				{
-					List<String> _keys = keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer+restKeys);
+					List<String> _keys = new ArrayList<String>(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer+restKeys));
 					d.setReducerKeys(_keys);
 				}
 				else 
 				{
-					List<String> _keys = keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer);
+					List<String> _keys = new ArrayList<String>(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
 					d.setReducerKeys(_keys);
 				}
 				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);

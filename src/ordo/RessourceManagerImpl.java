@@ -81,7 +81,7 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	@Override
 	public void addReducerKeys(HashSet<String> keys) throws RemoteException {
 		
-		keys.addAll(keys);
+		this.keys.addAll(keys);
 	}
 
 	@Override
