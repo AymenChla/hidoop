@@ -11,6 +11,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -22,7 +23,7 @@ import hdfs.NameNodeImpl;
 public class RessourceManagerImpl extends UnicastRemoteObject implements RessourceManager{
 	
 	
-	HashSet<String> keys;
+	HashMap<DataNodeInfo,HashSet<String>> keys;
 	List<DataNodeInfo> nodeManagers;
 	
 	static public String config_path = "../config/ressourcemanager.properties";
@@ -32,7 +33,7 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	
 	protected RessourceManagerImpl() throws RemoteException {
 		super();
-		keys = new HashSet<String>();
+		keys = new HashMap<DataNodeInfo, HashSet<String>>();
 		nodeManagers  = new ArrayList<DataNodeInfo>();
 		
 	}
@@ -79,9 +80,9 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	}
 
 	@Override
-	public void addReducerKeys(HashSet<String> keys) throws RemoteException {
+	public void addReducerKeys(DataNodeInfo dni,HashSet<String> keys) throws RemoteException {
 		
-		this.keys.addAll(keys);
+		this.keys.put(dni,keys);
 	}
 
 	@Override
@@ -97,7 +98,7 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	}
 
 	@Override
-	public HashSet<String> getReducerKeys() throws RemoteException {
+	public HashMap<DataNodeInfo,HashSet<String>> getReducerKeys() throws RemoteException {
 		return this.keys;
 	}
 	

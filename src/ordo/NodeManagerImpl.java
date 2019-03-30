@@ -127,7 +127,8 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 			Registry registry = LocateRegistry.getRegistry(rmIp,rmPort);
 			RessourceManager rm;
 			rm = (RessourceManager) registry.lookup(rmName);
-			rm.addReducerKeys(keys);
+			DataNodeInfo dni = new DataNodeInfo(this.ip, this.port, this.name);
+			rm.addReducerKeys(dni,keys);
 		} catch (NotBoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -155,20 +156,20 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		format.setFname(inputFname+"_reduceInter"+indice_reducer);
 		format.open(Format.OpenMode.W);
 		
-		for(String key:this.recuderKeys)
-		{
-			System.out.println("recherche clé: "+key);
-			HdfsClient.HdfsRead(inputFname, key, format);
-		}
 		
-				
+		//System.out.println("recherche clé: "+key);
+		HdfsClient.HdfsRead(inputFname, recuderKeys, format);
+
+	
+			
 		format.close();
 		format.open(Format.OpenMode.R);
 		
 		KVFormat writer = new KVFormat();
 		writer.setFname(inputFname+"_resReduce"+indice_reducer);
 		writer.open(Format.OpenMode.W);
-
+	   
+		
 		System.out.println("Lancement du reduce ...");
 		r.reduce(format, writer);
 		System.out.println("OK");

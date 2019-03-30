@@ -83,6 +83,7 @@ public class HdfsServer extends Thread{
 		
 		System.out.println("read-server");
 		Format format = FormatFactory.getFormat(cmd.getFmt());
+		System.out.println("I'm reading "+cmd.getChunkName()+" ######################################");
 		format.setFname(cmd.getChunkName());
 		format.open(OpenMode.R);
 		
@@ -93,6 +94,7 @@ public class HdfsServer extends Thread{
 				System.out.println(record);
 				oos.writeObject(record);
 			}
+			System.out.println("sending null");
 			oos.writeObject(null);
 			
 		} catch (IOException e) {
@@ -112,6 +114,7 @@ public class HdfsServer extends Thread{
 	{
 		try {
 			System.out.println("accepted");
+			ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
 			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
 			
 			
@@ -125,7 +128,7 @@ public class HdfsServer extends Thread{
 				break;
 				
 				case CMD_READ:
-					ObjectOutputStream oos = new ObjectOutputStream(client.getOutputStream());
+					
 					read(cmd,oos);
 					oos.close();
 				break;

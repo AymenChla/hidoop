@@ -96,13 +96,15 @@ public class LineFormat implements Format{
 		if(mode == OpenMode.R)
 		{
 			try {
+				if(br != null)
 				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		else if(mode == OpenMode.W){
-			pw.close();
+			if(pw != null)
+				pw.close();
 		}
 		
 		

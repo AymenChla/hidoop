@@ -2,8 +2,9 @@
 	
 	package hdfs;
 	import hdfs.Commande.NumCommande;
+import ordo.RessourceManager;
 
-	import java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -21,7 +22,10 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 	import formats.Format;
@@ -210,10 +214,11 @@ import formats.LineFormat;
 				List<MetadataChunk> chunks = metadataFile.getChunks();
 				for(MetadataChunk chunk : chunks)
 				{
+					List<DataNodeInfo> datanodes = chunk.getDatanodes();
 					boolean done = false;
 					for(int j = 0 ; j < chunk.getDatanodes().size() && !done; j++)
 					{
-						List<DataNodeInfo> datanodes = chunk.getDatanodes();
+						
 						Socket client = null;
 						ObjectOutputStream oos =null;
 						ObjectInputStream ois = null;
@@ -277,10 +282,10 @@ import formats.LineFormat;
         
     }
     
-    public static void HdfsRead(String hdfsFname, String key,Format format) {
+    public static void HdfsRead(String hdfsFname, List<String> keys,Format format) {
     	    	
     	//get MetadataFile
-		
+			System.out.println("start reading");
 
 			loadConfig(config_path);
 			NameNode nameNode;
@@ -290,45 +295,75 @@ import formats.LineFormat;
 				MetadataFile metadataFile = nameNode.getMetaDataFile(hdfsFname);
 				//Format format = FormatFactory.getFormat(metadataFile.getFmt());
 				
+				
+				
 				//format.setFname(localFSDestFname);
 				//format.open(OpenMode.W);
+				
+				
+				//ressourcemanager
+				Registry registry1 = LocateRegistry.getRegistry("localhost",4100);
+				RessourceManager rm = (RessourceManager) registry1.lookup("RessourceManagerDaemon");
+				HashMap<DataNodeInfo,HashSet<String>> hm = rm.getReducerKeys();
 				
 				List<MetadataChunk> chunks = metadataFile.getChunks();
 				for(MetadataChunk chunk : chunks)
 				{
-					boolean done = false;
-					for(int j = 0 ; j < chunk.getDatanodes().size() && !done; j++)
-					{
-						List<DataNodeInfo> datanodes = chunk.getDatanodes();
+					System.out.println("looking for chunk "+chunk.getHandle());
+					List<DataNodeInfo> datanodes = chunk.getDatanodes();
+					
 						Socket client = null;
 						ObjectOutputStream oos =null;
 						ObjectInputStream ois = null;
 						try {
-							client = new Socket(datanodes.get(j).getIp(),datanodes.get(j).getPort());
-							String handle = chunk.getHandle();
+							System.out.println("-----------------------");
+							client = new Socket(datanodes.get(0).getIp(),datanodes.get(0).getPort());
 							
-							String i = handle.substring(handle.length()-1,handle.length());
-							handle = handle.substring(0,handle.length()-1);
-							handle += "_inter"+i+"_"+key;
+							for(String key:keys)
+							{
+								
+								//check if server have key
+								for (Map.Entry<DataNodeInfo,HashSet<String>> entry : hm.entrySet())
+								{
+									if(entry.getValue().contains(key) && entry.getKey().getIp().equals(datanodes.get(0).getIp()))
+									{
+										String handle = chunk.getHandle();
+										String i = handle.substring(handle.length()-1,handle.length());
+										handle = handle.substring(0,handle.length()-1);
+										handle += "_inter"+i+"_"+key;
+										
+										Commande cmd = new Commande(NumCommande.CMD_READ,handle,Format.Type.KV);
+										
+										System.out.println("=========================");
+										oos = new ObjectOutputStream(client.getOutputStream());
+						    			oos.writeObject(cmd);
+						    			
+						    			System.out.println("########################");
+						    			KV record = null;
+						    			InputStream is =  client.getInputStream();
+						    			System.out.println("========================");
+						    			ois = new ObjectInputStream(is);
+						    			
+						    			System.out.println("+++++++++++++++++++++");
+						    			while((record = (KV) ois.readObject()) != null)
+						    			{
+						    				System.out.println("writing new record: "+record.toString());
+						    				format.write(record);
+						    			}
+						    			
+						    			System.out.println("reading "+ key +" done");
+									}
+								
+									
+								}
+								
+								
+				    			
+							}
 							
-							Commande cmd = new Commande(NumCommande.CMD_READ,handle,Format.Type.KV);
-							
-							oos = new ObjectOutputStream(client.getOutputStream());
-			    			oos.writeObject(cmd);
-			    			
-			    			KV record = null;
-			    			ois = new ObjectInputStream(client.getInputStream());
-			    			
-			    			while((record = (KV) ois.readObject()) != null)
-			    			{
-			    				format.write(record);
-			    			}
-			    			
-			    			
-			    			done = true;
-						} catch (IOException | ClassNotFoundException e) {
+						} catch (Exception e) {
 							// TODO Auto-generated catch block
-							//e.printStackTrace();
+							e.printStackTrace();
 						}
 						finally{
 							
@@ -346,7 +381,7 @@ import formats.LineFormat;
 						}
 						
 		    		
-					}
+					
 						 
 				}
 				

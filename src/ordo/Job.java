@@ -15,8 +15,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import formats.Format;
@@ -202,7 +204,14 @@ public class Job implements JobInterfaceX{
 		int nbActifReducers = Math.min(this.numberOfReduces,this.machines.size());
 		//reducers
 		try {
-			List<String> keys = new ArrayList<String>(rm.getReducerKeys());
+			HashMap<DataNodeInfo,HashSet<String>> hm =  rm.getReducerKeys();
+			HashSet<String> setKeys = new HashSet<String>();
+			for (Map.Entry<DataNodeInfo,HashSet<String>> entry : hm.entrySet())
+			{
+				setKeys.addAll(entry.getValue());
+				
+			}
+			List<String> keys = new ArrayList<String>(setKeys);
 			
 			int nbKeysPerReducer = keys.size()/nbActifReducers;
 			int restKeys = keys.size()%nbActifReducers;
