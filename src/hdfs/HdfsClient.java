@@ -246,8 +246,8 @@ import formats.LineFormat;
 						finally{
 							
 							try {
-								if(client != null)
-								client.close();
+								/*if(client != null)
+								client.close();*/
 								if(oos != null)
 								oos.close();
 								if(ois != null)
@@ -321,6 +321,7 @@ import formats.LineFormat;
 			    			
 			    			while((record = (KV) ois.readObject()) != null)
 			    			{
+			    				System.out.println("writing new record:"+record.toString());
 			    				format.write(record);
 			    			}
 			    			
@@ -333,8 +334,8 @@ import formats.LineFormat;
 						finally{
 							
 							try {
-								if(client != null)
-								client.close();
+								/*if(client != null)
+								client.close();*/
 								if(oos != null)
 								oos.close();
 								if(ois != null)
@@ -350,7 +351,7 @@ import formats.LineFormat;
 						 
 				}
 				
-				//format.close();
+				format.close();
 
 				
 			} catch (RemoteException

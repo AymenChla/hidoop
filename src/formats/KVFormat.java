@@ -98,12 +98,14 @@ public class KVFormat implements Format{
 		if(mode == OpenMode.R)
 		{
 			try {
+				if(br!=null)
 				br.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		else if(mode == OpenMode.W){
+			if(pw != null)
 			pw.close();
 		}
 		

@@ -157,6 +157,12 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		
 		for(String key:this.recuderKeys)
 		{
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			System.out.println("recherche clé: "+key);
 			HdfsClient.HdfsRead(inputFname, key, format);
 		}

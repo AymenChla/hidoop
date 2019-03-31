@@ -226,7 +226,12 @@ public class Job implements JobInterfaceX{
 				}
 				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
 				reduceRunner.start();
-			
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 		} catch (RemoteException e) {

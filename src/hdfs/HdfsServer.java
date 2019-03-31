@@ -137,7 +137,7 @@ public class HdfsServer extends Thread{
 			
 			
 			ois.close();
-			client.close();
+			//client.close();
 			
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
