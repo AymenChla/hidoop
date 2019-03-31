@@ -210,15 +210,13 @@ import formats.LineFormat;
 				List<MetadataChunk> chunks = metadataFile.getChunks();
 				for(MetadataChunk chunk : chunks)
 				{
-					boolean done = false;
-					for(int j = 0 ; j < chunk.getDatanodes().size() && !done; j++)
-					{
+					
 						List<DataNodeInfo> datanodes = chunk.getDatanodes();
 						Socket client = null;
 						ObjectOutputStream oos =null;
 						ObjectInputStream ois = null;
 						try {
-							client = new Socket(datanodes.get(j).getIp(),datanodes.get(j).getPort());
+							client = new Socket(datanodes.get(0).getIp(),datanodes.get(0).getPort());
 							String handle = chunk.getHandle();
 							if(isMap)
 							{
@@ -238,7 +236,7 @@ import formats.LineFormat;
 			    				format.write(record);
 			    			}
 			    			
-			    			done = true;
+			    			//done = true;
 						} catch (IOException | ClassNotFoundException e) {
 							// TODO Auto-generated catch block
 							//e.printStackTrace();
@@ -256,7 +254,7 @@ import formats.LineFormat;
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-						}
+						
 						
 		    		
 					}

@@ -224,14 +224,15 @@ public class Job implements JobInterfaceX{
 					List<String> _keys = new ArrayList<String>(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
 					d.setReducerKeys(_keys);
 				}
-				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
-				reduceRunner.start();
-				try {
+				//ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
+				//reduceRunner.start();
+				d.runReduce(mr, inputFName, cb,i);
+				/*try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
 			}
 			
 		} catch (RemoteException e) {
