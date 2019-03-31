@@ -229,7 +229,7 @@ import formats.LineFormat;
 							{
 								String i = handle.substring(handle.length()-1,handle.length());
 								handle = handle.substring(0,handle.length()-1);
-								handle += "_inter"+i;
+								handle += "_reduceInter"+i;
 							}
 							Commande cmd = new Commande(NumCommande.CMD_READ,handle,metadataFile.getFmt());
 							

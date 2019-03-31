@@ -221,7 +221,7 @@ public class Job implements JobInterfaceX{
 			for(int i=0 ; i < nbActifReducers ; i++)
 			{
 				NodeManager d = demons.get(i);
-				System.out.println("Appel des Maps");
+				System.out.println("Appel des redeucers");
 				
 				if(i==nbActifReducers-1)
 				{
@@ -233,8 +233,9 @@ public class Job implements JobInterfaceX{
 					List<String> _keys = new ArrayList<String>(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
 					d.setReducerKeys(_keys);
 				}
-				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
-				reduceRunner.start();
+				//ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
+				//reduceRunner.start();
+				d.runReduce(mr, inputFName, cb, i);
 			
 			}
 			
@@ -251,10 +252,10 @@ public class Job implements JobInterfaceX{
 		}
 		
 		System.out.println("Succes");
-		// On utilise HDFS pour r�cup�rer le fichier r�sultat concat�n� dans resReduce
+		// On utilise HDFS pour récupérer le fichier résultat concaténé dans resReduce
 	
-    	/*
-    	System.out.println("R�cup�ration du fichier r�sultat final");
+    
+    	System.out.println("Récupération du fichier résultat final");
     	
 		HdfsClient.HdfsRead(input.getFname(), redResult.getFname(),true);
 		
@@ -266,13 +267,13 @@ public class Job implements JobInterfaceX{
     	// Ogverture du fichier output
         output.open(Format.OpenMode.W);
 
-		// On applique le reduce sur le r�sultat concat�n� des maps et on le met dans l'output
+		// On applique le reduce sur le résultat concaténé des maps et on le met dans l'output
         
-    	System.out.println("Lancement du Reduce");
+    	System.out.println("Lancement du Reduce Global");
     	mr.reduce(redResult, output);
     	output.close();    	
-    	*/
-    	System.out.println("All Done!!!!!");
+    
+    	System.out.println("Votre fichier résultat est bien sauvegardé!!!!!");
 	
 		
 	}
