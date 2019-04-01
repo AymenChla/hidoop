@@ -2,7 +2,7 @@ package formats;
 
 import java.io.Serializable;
 
-public class KV implements Serializable{ 
+public class KV implements Serializable, Comparable{ 
 
 	/**
 	 * 
@@ -25,5 +25,12 @@ public class KV implements Serializable{
 	public String toString() {
 		return "KV [k=" + k + ", v=" + v + "]";
 	}
+
+	@Override
+	public int compareTo(Object arg0) {
+		KV other = (KV) arg0;
+		return Integer.parseInt(this.v) - Integer.parseInt(other.v);
+	}
+
 	
 }

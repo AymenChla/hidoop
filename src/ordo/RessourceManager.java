@@ -17,4 +17,5 @@ public interface RessourceManager extends Remote{
 
 	public void addReducerKeys(HashSet<String> keys) throws RemoteException;
 	public HashSet<String> getReducerKeys() throws RemoteException;
+	public void initReducerKeys() throws RemoteException;
 }

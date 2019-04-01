@@ -222,7 +222,7 @@ import formats.LineFormat;
 							{
 								String i = handle.substring(handle.length()-1,handle.length());
 								handle = handle.substring(0,handle.length()-1);
-								handle += "_inter"+i;
+								handle += "_resReduce"+i;
 							}
 							Commande cmd = new Commande(NumCommande.CMD_READ,handle,metadataFile.getFmt());
 							
@@ -349,7 +349,7 @@ import formats.LineFormat;
 						 
 				}
 				
-				format.close();
+				//format.close();
 
 				
 			} catch (RemoteException

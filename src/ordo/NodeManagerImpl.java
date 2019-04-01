@@ -74,6 +74,7 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 	@Override
 	public void runMap(Mapper m, Format reader, Format writer, CallBack cb) throws RemoteException {
 		 
+	
 		
 		String fname = writer.getFname(); 
 		
@@ -142,7 +143,9 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		
 		
 		
-		
+	    //init/reinit Hash
+		shuffle=new HashMap<String, ArrayList<String>>();
+		keys = new HashSet<String>();
 	}
 	
 	@Override
@@ -157,12 +160,12 @@ public class NodeManagerImpl  extends UnicastRemoteObject implements NodeManager
 		
 		for(String key:this.recuderKeys)
 		{
-			/*try {
+			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}*/
+			}
 			System.out.println("recherche clé: "+key);
 			HdfsClient.HdfsRead(inputFname, key, format);
 		}

@@ -5,6 +5,7 @@ import formats.Format;
 import formats.FormatReader;
 import formats.FormatWriter;
 import formats.KV;
+import formats.KVFormat;
 import map.MapReduce;
 import ordo.Job;
 
@@ -153,7 +154,7 @@ public class QuasiMonteCarlo  implements MapReduce {
   public void reduce(FormatReader reader, FormatWriter writer) {
 	  float nbExternes = 0f;
 		float nbInternes = 0f;
-		float pi;
+		
       KV kv;
 		while ((kv = reader.read()) != null) {
 			if((kv.k).equals("In")){
@@ -164,17 +165,35 @@ public class QuasiMonteCarlo  implements MapReduce {
 				System.out.println("On a pas lu la bonne clé du KV !!!");
 			}
 		}
-		
-		//Calculer la décimale de pi
-		System.out.println("InFinal " + nbInternes + " OutFinal " + nbExternes);
-		pi = 4f * (nbInternes / (nbInternes + nbExternes));
-		System.out.println("Voici la valeur de PI = " + pi + " ! ");
-		writer.write(new KV("Pi", String.valueOf(pi)));
+		writer.write(new KV("In",nbInternes+""));
+		writer.write(new KV("Out",nbExternes+""));
   	
   }
   
   
-
+  private static float pi(FormatReader reader)
+  {
+	  KV kv;
+	  float nbExternes = 0f;
+	  float nbInternes = 0f;
+	  float pi;
+	  
+	  while ((kv = reader.read()) != null) {
+			if((kv.k).equals("In")){
+				nbInternes = Float.parseFloat(kv.v);
+			} else if (kv.k.equals("Out")) {
+				nbExternes = Float.parseFloat(kv.v);
+			} else {
+				System.out.println("On a pas lu la bonne clé du KV !!!");
+			}
+	  }
+	  
+	//Calculer la décimale de pi
+	System.out.println("InFinal " + nbInternes + " OutFinal " + nbExternes);
+	pi = 4f * (nbInternes / (nbInternes + nbExternes));
+	return pi; 
+	
+  }
   
   public static void main(String[] argv) throws Exception {
 	  Job j = new Job();
@@ -191,8 +210,13 @@ public class QuasiMonteCarlo  implements MapReduce {
       System.out.println("On a lancé le Monte Carlo");
 		j.startJob(new QuasiMonteCarlo()); // on devra exécuter le programme principal dans startJob
 		
-		// On affiche le temps qu'à pris le MapReduce
-		long t2 = System.currentTimeMillis();
+	   KVFormat reader = new KVFormat();
+	   reader.setFname(argv[0]+"_resultat");
+	   reader.open(Format.OpenMode.R);
+	  System.out.println("Voici la valeur de PI = " + pi(reader) + " ! ");
+		
+	  // On affiche le temps qu'à pris le MapReduce
+	  long t2 = System.currentTimeMillis();
       System.out.println("time in ms ="+(t2-t1));
       System.exit(0);
   }

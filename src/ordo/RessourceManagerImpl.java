@@ -100,6 +100,12 @@ public class RessourceManagerImpl extends UnicastRemoteObject implements Ressour
 	public HashSet<String> getReducerKeys() throws RemoteException {
 		return this.keys;
 	}
+
+	@Override
+	public void initReducerKeys() throws RemoteException {
+		this.keys = new HashSet<String>();
+	}
+	
 	
 	
 	

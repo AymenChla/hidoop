@@ -155,6 +155,9 @@ public class Job implements JobInterfaceX{
 
 		System.out.println("Lancement des Maps");
 		
+		
+		
+		
 		for(int i = 0; i < this.numberOfMaps; i++) {
 			NodeManager d = demons.get(i);
 			
@@ -224,9 +227,9 @@ public class Job implements JobInterfaceX{
 					List<String> _keys = new ArrayList<String>(keys.subList(i*nbKeysPerReducer, (i+1)*nbKeysPerReducer));
 					d.setReducerKeys(_keys);
 				}
-				//ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
-				//reduceRunner.start();
-				d.runReduce(mr, inputFName, cb,i);
+				ReduceThread reduceRunner = new ReduceThread(d, mr,inputFName, cb,i);
+				reduceRunner.start();
+				//d.runReduce(mr, inputFName, cb,i);
 				/*try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
@@ -250,7 +253,7 @@ public class Job implements JobInterfaceX{
 		System.out.println("Succes");
 		// On utilise HDFS pour r�cup�rer le fichier r�sultat concat�n� dans resReduce
 	
-    	/*
+    	
     	System.out.println("R�cup�ration du fichier r�sultat final");
     	
 		HdfsClient.HdfsRead(input.getFname(), redResult.getFname(),true);
@@ -268,9 +271,18 @@ public class Job implements JobInterfaceX{
     	System.out.println("Lancement du Reduce");
     	mr.reduce(redResult, output);
     	output.close();    	
-    	*/
+    	
     	System.out.println("All Done!!!!!");
-	
+    	
+    	
+    	
+    	//reinit list of keys for reducers
+		try {
+			rm.initReducerKeys();
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 	}
 
